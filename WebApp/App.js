@@ -66,7 +66,13 @@ const Section = ({ children, title }) => {
 
 const App = () => {
     // debugger;
-    fetch("http://localhost:44347/allUsers")
+    const options = {
+        method: 'GET',
+        headers : {
+            'Content-type': 'application/json',
+        }
+    };
+    fetch("http://86.26.224.167:44347/allUsers", options)
         .then((response) => response.json())
         .then((json) => {
             console.log("it worked")
