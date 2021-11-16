@@ -45,9 +45,9 @@ namespace DogWalkNationAPI.Services
         /// <param name="id"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public async Task Delete(string id, string key)
+        public async Task Delete(Guid id, string key)
         {
-            await _container.DeleteItemAsync<T>(id, new PartitionKey(key));
+            await _container.DeleteItemAsync<T>(id.ToString(), new PartitionKey(key));
         }
 
         /// <summary>
@@ -56,11 +56,11 @@ namespace DogWalkNationAPI.Services
         /// <param name="id"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public async Task<T> Get(string id, string key)
+        public async Task<T> Get(Guid id, string key)
         {
             try
             {
-                var response = await _container.ReadItemAsync<T>(id, new PartitionKey(key));
+                var response = await _container.ReadItemAsync<T>(id.ToString(), new PartitionKey(key));
                 return response.Resource;
             }
             catch (CosmosException)
@@ -74,9 +74,9 @@ namespace DogWalkNationAPI.Services
         /// </summary>
         /// <param name="queryString"></param>
         /// <returns>A list of any type item</returns>
-        public async Task<IEnumerable<T>> GetMultiple(string queryString)
+        public async Task<IEnumerable<T>> GetMultiple(QueryDefinition queryString)
         {
-            var query = _container.GetItemQueryIterator<T>(new QueryDefinition(queryString));
+            var query = _container.GetItemQueryIterator<T>(queryString);
 
             var results = new List<T>();
             while (query.HasMoreResults)

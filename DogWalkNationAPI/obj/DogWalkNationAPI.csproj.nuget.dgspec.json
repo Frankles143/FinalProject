@@ -44,9 +44,9 @@
         "net5.0": {
           "targetAlias": "net5.0",
           "dependencies": {
-            "Microsoft.Azure.DocumentDB.Core": {
+            "Microsoft.Azure.Cosmos": {
               "target": "Package",
-              "version": "[2.16.2, )"
+              "version": "[3.23.0, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
