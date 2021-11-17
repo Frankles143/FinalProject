@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -35,5 +36,15 @@ namespace DogWalkNationAPI.Models
         public List<string> FavouriteWalks { get; set; }
         [JsonProperty(PropertyName = "dateRegistered")]
         public DateTime DateRegistered { get; set; }
+    }
+
+    public class UserLogin
+    {
+        [JsonProperty(PropertyName = "email")]
+        [EmailAddress]
+        public string Email { get; set; }
+        [JsonProperty(PropertyName = "password")]
+        public string Password { get; set; }
+
     }
 }

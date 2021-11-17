@@ -105,5 +105,90 @@ namespace DogWalkNationAPI.Controllers
 
             return new Responses.Default() { Success = true, Message = "User created" };
         }
+
+        //[HttpPost]
+        //[Route("/[controller]/login")]
+        //public async Task<Responses.Default> Login(string email, string password)
+        //{
+        //    email = Regex.Replace(email.ToLower(), @"\s+", "");
+
+        //    //Grab user by email
+        //    var query = new QueryDefinition("SELECT * FROM c WHERE c.Email = @email")
+        //        .WithParameter("@email", email);
+
+        //    var userList = await _userHelper.GetMultiple(query);
+
+        //    //Check if a user was found
+        //    if (!userList.Any())
+        //    {
+        //        return new Responses.Default() { Success = false, Message = "User not found" };
+        //    }
+        //    else
+        //    {
+        //        var user = userList.FirstOrDefault();
+        //        //Check password
+        //        if (VerifyPassword(user, password) == true)
+        //        {
+        //            return new Responses.Default() { Success = true, Message = "User found and logged in successfully" };
+        //        }
+        //        else
+        //        {
+        //            return new Responses.Default() { Success = false, Message = "Incorrect password" };
+        //        }
+        //    }
+        //}
+
+        [HttpPost]
+        [Route("/[controller]/login")]
+        public async Task<Responses.Default> Login(UserLogin userLogin)
+        {
+            userLogin.Email = Regex.Replace(userLogin.Email.ToLower(), @"\s+", "");
+
+            //Grab user by email
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.email = @email")
+                .WithParameter("@email", userLogin.Email);
+
+            var userList = await _userHelper.GetMultiple(query);
+
+            //Check if a user was found
+            if (!userList.Any())
+            {
+                return new Responses.Default() { Success = false, Message = "User not found" };
+            }
+            else
+            {
+                var user = userList.FirstOrDefault();
+                //Check password
+                if (VerifyPassword(user, userLogin.Password) == true)
+                {
+                    return new Responses.Default() { Success = true, Message = "User found and logged in successfully" };
+                }
+                else
+                {
+                    return new Responses.Default() { Success = false, Message = "Incorrect password" };
+                }
+            }
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        public bool VerifyPassword(Models.User user, string password)
+        {
+            //Hash password with users salt
+            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: password,
+                salt: user.Salt,
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 100000,
+                numBytesRequested: 256 / 8));
+
+            //Check against current hashed password
+            if (hashed == user.HashedPassword)
+            {
+                return true;
+            } else
+            {
+                return false;
+            }
+        }
     }
 }
