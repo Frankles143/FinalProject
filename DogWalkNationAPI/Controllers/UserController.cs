@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DogWalkNationAPI.Controllers
-{ 
+{
     //Get mapper
 
     [ApiController]
@@ -44,7 +44,7 @@ namespace DogWalkNationAPI.Controllers
 
         [HttpPost]
         [Route("/[controller]/register")]
-        public async Task<Responses.Default> RegisterUser(Models.User newUser)
+        public async Task<Responses.Default> RegisterUser(UserRegister newUser)
         {
             //bool valid;
             //string msg;
@@ -88,55 +88,20 @@ namespace DogWalkNationAPI.Controllers
 
             //Hash the currently non hashed password
             string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: newUser.HashedPassword,
+                password: newUser.Password,
                 salt: salt,
                 prf: KeyDerivationPrf.HMACSHA256,
                 iterationCount: 100000,
                 numBytesRequested: 256 / 8));
 
-            newUser.HashedPassword = hashed;
-            newUser.Salt = salt;
-            newUser.DateRegistered = DateTime.UtcNow;
-            newUser.UserId = Guid.NewGuid();
-
+            //Create User object
+            Models.User fullUser = new(newUser.Username, newUser.Email, newUser.FirstName, newUser.LastName, salt, hashed);
 
             // Add New User to DB
-            await _userHelper.Update(newUser.Username, newUser);
+            await _userHelper.Update(fullUser.Username, fullUser);
 
             return new Responses.Default() { Success = true, Message = "User created" };
         }
-
-        //[HttpPost]
-        //[Route("/[controller]/login")]
-        //public async Task<Responses.Default> Login(string email, string password)
-        //{
-        //    email = Regex.Replace(email.ToLower(), @"\s+", "");
-
-        //    //Grab user by email
-        //    var query = new QueryDefinition("SELECT * FROM c WHERE c.Email = @email")
-        //        .WithParameter("@email", email);
-
-        //    var userList = await _userHelper.GetMultiple(query);
-
-        //    //Check if a user was found
-        //    if (!userList.Any())
-        //    {
-        //        return new Responses.Default() { Success = false, Message = "User not found" };
-        //    }
-        //    else
-        //    {
-        //        var user = userList.FirstOrDefault();
-        //        //Check password
-        //        if (VerifyPassword(user, password) == true)
-        //        {
-        //            return new Responses.Default() { Success = true, Message = "User found and logged in successfully" };
-        //        }
-        //        else
-        //        {
-        //            return new Responses.Default() { Success = false, Message = "Incorrect password" };
-        //        }
-        //    }
-        //}
 
         [HttpPost]
         [Route("/[controller]/login")]
@@ -153,7 +118,7 @@ namespace DogWalkNationAPI.Controllers
             //Check if a user was found
             if (!userList.Any())
             {
-                return new Responses.Default() { Success = false, Message = "User not found" };
+                return new Responses.Default() { Success = false, Message = "Email address not found" };
             }
             else
             {
@@ -161,7 +126,7 @@ namespace DogWalkNationAPI.Controllers
                 //Check password
                 if (VerifyPassword(user, userLogin.Password) == true)
                 {
-                    return new Responses.Default() { Success = true, Message = "User found and logged in successfully" };
+                    return new Responses.DefaultWithUser() { Success = true, Message = "User found and logged in successfully", User = user };
                 }
                 else
                 {
@@ -185,7 +150,8 @@ namespace DogWalkNationAPI.Controllers
             if (hashed == user.HashedPassword)
             {
                 return true;
-            } else
+            }
+            else
             {
                 return false;
             }

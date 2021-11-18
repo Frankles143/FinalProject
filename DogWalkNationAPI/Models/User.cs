@@ -9,9 +9,19 @@ namespace DogWalkNationAPI.Models
 {
     public class User
     {
-        public User()
+        public User(string username, string email, string firstName, string lastName, byte[] salt, string hashedPassword)
         {
-
+            UserId = Guid.NewGuid();
+            Username = username;
+            Email = email;
+            FirstName = firstName;
+            LastName = lastName;
+            Salt = salt;
+            HashedPassword = hashedPassword;
+            CreatedWalks = new List<string>();
+            FavouriteWalks = new List<string>();
+            DateRegistered = DateTime.UtcNow;
+            
         }
 
         public static string ContainerName = "User";
@@ -46,5 +56,19 @@ namespace DogWalkNationAPI.Models
         [JsonProperty(PropertyName = "password")]
         public string Password { get; set; }
 
+    }
+
+    public class UserRegister
+    {
+        [JsonProperty(PropertyName = "username")]
+        public string Username { get; set; }
+        [JsonProperty(PropertyName = "email")]
+        public string Email { get; set; }
+        [JsonProperty(PropertyName = "firstName")]
+        public string FirstName { get; set; }
+        [JsonProperty(PropertyName = "lastName")]
+        public string LastName { get; set; }
+        [JsonProperty(PropertyName = "password")]
+        public string Password { get; set; }
     }
 }
