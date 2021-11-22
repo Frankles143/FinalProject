@@ -9,6 +9,8 @@ namespace DogWalkNationAPI.Models
 {
     public class User
     {
+        public User() { }
+
         public User(string username, string email, string firstName, string lastName, byte[] salt, string hashedPassword)
         {
             UserId = Guid.NewGuid();
@@ -70,5 +72,13 @@ namespace DogWalkNationAPI.Models
         public string LastName { get; set; }
         [JsonProperty(PropertyName = "password")]
         public string Password { get; set; }
+    }
+
+    public class UserChangePassword : User
+    {
+        [JsonProperty(PropertyName = "oldPassword")]
+        public string OldPassword { get; set; }
+        [JsonProperty(PropertyName = "newPassword")]
+        public string NewPassword { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using DogWalkNationAPI.Models;
+﻿using AutoMapper;
+using DogWalkNationAPI.Models;
 using DogWalkNationAPI.Services;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
@@ -21,10 +22,12 @@ namespace DogWalkNationAPI.Controllers
     public class UserController : Controller
     {
         private readonly ICosmosService<Models.User> _userHelper;
+        private readonly IMapper _mapper;
 
-        public UserController(CosmosClient dbClient)
+        public UserController(CosmosClient dbClient, IMapper mapper)
         {
             _userHelper = new CosmosService<Models.User>(dbClient, Models.User.ContainerName);
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -133,6 +136,44 @@ namespace DogWalkNationAPI.Controllers
                     return new Responses.Default() { Success = false, Message = "Incorrect password" };
                 }
             }
+        }
+
+        [HttpPost]
+        [Route("/[controller]/passwordchange")]
+        public async Task<Responses.Default> ChangePassword(UserChangePassword user)
+        {
+            //Check password
+            if (VerifyPassword(user, user.OldPassword) == true)
+            {
+                //Hash the new password
+                string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: user.NewPassword,
+                salt: user.Salt,
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 100000,
+                numBytesRequested: 256 / 8));
+
+                //Change users hashed password and update
+                user.HashedPassword = hashed;
+
+                //Map onto User model
+                Models.User userUpdate = _mapper.Map<Models.User>(user);
+
+                try
+                {
+                    await _userHelper.Update(userUpdate.Username, userUpdate);
+                    return new Responses.Default() { Success = true, Message = "Password changed successfully" };
+                }
+                catch (CosmosException)
+                {
+                    return default;
+                }
+            }
+            else
+            {
+                return new Responses.Default() { Success = false, Message = "Incorrect password" };
+            }
+
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
