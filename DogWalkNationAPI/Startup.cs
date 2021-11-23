@@ -1,4 +1,6 @@
+using DogWalkNationAPI.Helpers;
 using DogWalkNationAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -37,11 +39,15 @@ namespace DogWalkNationAPI
 
             CosmosClient dbClient = new CosmosClient(Configuration.GetConnectionString("cosmosDb"));
             services.AddSingleton(dbClient);
-            
 
-            //Dependency injection
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
-            //Should convert all JSON to camelCase
+            services.AddScoped<JwtService>();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => Configuration.Bind("JwtSettings", options));
+
+            //Should convert all JSON property names to camelCase
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented,
@@ -51,6 +57,30 @@ namespace DogWalkNationAPI
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "DogWalkNationAPI", Version = "v1" });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter ‘Bearer’ [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\"",
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+
+                });
             });
         }
 
@@ -68,7 +98,16 @@ namespace DogWalkNationAPI
 
             app.UseRouting();
 
+            app.UseAuthentication();
+
             app.UseAuthorization();
+
+            app.UseCors(x => x
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+
+            app.UseMiddleware<JwtMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

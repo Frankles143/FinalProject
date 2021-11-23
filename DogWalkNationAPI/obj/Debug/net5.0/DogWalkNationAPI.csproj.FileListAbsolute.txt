@@ -145,3 +145,7 @@ D:\Git\FinalProject\DogWalkNationAPI\bin\Debug\net5.0\Azure.Core.dll
 D:\Git\FinalProject\DogWalkNationAPI\bin\Debug\net5.0\Microsoft.Bcl.HashCode.dll
 D:\Git\FinalProject\DogWalkNationAPI\bin\Debug\net5.0\AutoMapper.dll
 D:\Git\FinalProject\DogWalkNationAPI\bin\Debug\net5.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+D:\Git\FinalProject\DogWalkNationAPI\bin\Debug\net5.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Git\FinalProject\DogWalkNationAPI\bin\Debug\net5.0\System.Net.Http.Formatting.dll
+D:\Git\FinalProject\DogWalkNationAPI\bin\Debug\net5.0\System.Web.Http.dll
+D:\Git\FinalProject\DogWalkNationAPI\bin\Debug\net5.0\Newtonsoft.Json.Bson.dll

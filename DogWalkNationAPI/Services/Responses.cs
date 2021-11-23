@@ -26,5 +26,10 @@ namespace DogWalkNationAPI.Services
             [JsonProperty]
             public Models.User User { get; set; }
         }
+        public class DefaultWithUserAndToken : DefaultWithUser
+        {
+            [JsonProperty]
+            public string Token { get; set; }
+        }
     }
 }

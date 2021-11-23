@@ -1,17 +1,17 @@
 ﻿using AutoMapper;
 using DogWalkNationAPI.Models;
 using DogWalkNationAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DogWalkNationAPI.Helpers;
 
 namespace DogWalkNationAPI.Controllers
 {
@@ -23,13 +23,16 @@ namespace DogWalkNationAPI.Controllers
     {
         private readonly ICosmosService<Models.User> _userHelper;
         private readonly IMapper _mapper;
+        private readonly JwtService _jwtService;
 
-        public UserController(CosmosClient dbClient, IMapper mapper)
+        public UserController(CosmosClient dbClient, IMapper mapper, JwtService jwtService)
         {
             _userHelper = new CosmosService<Models.User>(dbClient, Models.User.ContainerName);
             _mapper = mapper;
+            _jwtService = jwtService;
         }
 
+        [TokenAuthorize]
         [HttpGet]
         [Route("/[controller]/allUsers")]
         public async Task<IActionResult> GetAllUsers()
@@ -38,6 +41,7 @@ namespace DogWalkNationAPI.Controllers
             return Ok(await _userHelper.GetMultiple(query));
         }
 
+        [TokenAuthorize]
         [HttpGet]
         [Route("/[controller]/{id}/{key}")]
         public async Task<IActionResult> GetUser(Guid id, string key)
@@ -45,6 +49,7 @@ namespace DogWalkNationAPI.Controllers
             return Ok(await _userHelper.Get(id, key));
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("/[controller]/register")]
         public async Task<Responses.Default> RegisterUser(UserRegister newUser)
@@ -106,6 +111,7 @@ namespace DogWalkNationAPI.Controllers
             return new Responses.Default() { Success = true, Message = "User created" };
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("/[controller]/login")]
         public async Task<Responses.Default> Login(UserLogin userLogin)
@@ -129,7 +135,8 @@ namespace DogWalkNationAPI.Controllers
                 //Check password
                 if (VerifyPassword(user, userLogin.Password) == true)
                 {
-                    return new Responses.DefaultWithUser() { Success = true, Message = "User found and logged in successfully", User = user };
+                    var token = _jwtService.GenerateJwtToken(user);
+                    return new Responses.DefaultWithUserAndToken() { Success = true, Message = "User found and logged in successfully", User = user, Token = token };
                 }
                 else
                 {
@@ -138,6 +145,7 @@ namespace DogWalkNationAPI.Controllers
             }
         }
 
+        [TokenAuthorize]
         [HttpPost]
         [Route("/[controller]/passwordchange")]
         public async Task<Responses.Default> ChangePassword(UserChangePassword user)
