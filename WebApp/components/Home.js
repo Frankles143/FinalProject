@@ -83,7 +83,7 @@ const Home = ({ navigation }) => {
                 if(value !== null) {
                     var JsonValue = JSON.parse(value);
                     setUser(JsonValue);
-                    console.log(JsonValue);
+                    // console.log(JsonValue);
                     setIsLoading(false);
                   }
             })
@@ -113,6 +113,8 @@ const Home = ({ navigation }) => {
                     <Text style={styles.loginText}>Welcome home, {user.firstName} {user.lastName}</Text>
                     <Text style={styles.loginText}>Your unique user ID is {user.userId}</Text>
                     <Text style={styles.loginText}>Your username is: {user.username}</Text>
+                    <Text></Text>
+                    <Button title="Go to location test" onPress={() => navigation.navigate("Location")} />
                 </View>
             </ScrollView>
         </SafeAreaView>

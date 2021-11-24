@@ -152,6 +152,7 @@ const Login = ({ navigation }) => {
                         secureTextEntry={true}
                     />
                     <View styles={styles.submit}>
+                        <Text></Text>
                         <Button title="Submit" onPress={() => CheckLoginDetails()} />
                     </View>
                 </View>
