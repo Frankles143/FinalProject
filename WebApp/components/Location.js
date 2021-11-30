@@ -1,50 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { Node } from 'react';
 import Toast from 'react-native-simple-toast';
-import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, Platform, PermissionsAndroid, useColorScheme, View, Linking } from 'react-native';
+import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, Platform, PermissionsAndroid, useColorScheme, View, Linking, Switch } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Geolocation from 'react-native-geolocation-service';
+import VIForegroundService from '@voximplant/react-native-foreground-service';
 
-const styles = StyleSheet.create({
-    sectionContainer: {
-        marginTop: 32,
-        paddingHorizontal: 24,
-    },
-    sectionTitle: {
-        fontSize: 24,
-        fontWeight: '600',
-    },
-    sectionDescription: {
-        marginTop: 8,
-        fontSize: 18,
-        fontWeight: '400',
-    },
-    highlight: {
-        fontWeight: '700',
-    },
-    mainView: {
-        justifyContent: 'center',
-        alignItems: "center"
-    },
-    loginText: {
-        textAlign: "center",
-        marginTop: 15,
-        fontSize: 15,
-    },
-    input: {
-        width: '60%',
-        marginTop: 20,
-        borderStyle: "solid",
-        borderColor: "black",
-        borderWidth: 2
-    },
-    submit: {
-        width: "40%",
-        marginTop: 15,
-    },
-});
-
+import appConfig from '../app.json';
 
 const Section = ({ children, title }) => {
     const isDarkMode = useColorScheme() === 'dark';
@@ -75,11 +38,20 @@ const Section = ({ children, title }) => {
 
 const Location = ({ navigation }) => {
     // debugger;
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [user, setUser] = React.useState();
-    const [location, setLocation] = React.useState(null);
-    const [latitude, setLatitude] = React.useState("");
-    const [longitude, setLongitude] = React.useState("");
+    const [isLoading, setIsLoading] = useState(true);
+    const [user, setUser] = useState();
+    const [location, setLocation] = useState(null);
+    const [latitude, setLatitude] = useState("");
+    const [longitude, setLongitude] = useState("");
+    const [foregroundService, setForegroundService] = useState(true);
+    const [forceLocation, setForceLocation] = useState(true);
+    const [highAccuracy, setHighAccuracy] = useState(true);
+    const [locationDialog, setLocationDialog] = useState(true);
+    const [significantChanges, setSignificantChanges] = useState(false);
+    const [observing, setObserving] = useState(false);
+    const [useLocationManager, setUseLocationManager] = useState(false);
+
+    const watchId = useRef(null);
 
     const hasLocationPermission = async () => {
 
@@ -145,16 +117,88 @@ const Location = ({ navigation }) => {
                     android: 'high',
                     ios: 'best',
                 },
-                enableHighAccuracy: true,
+                enableHighAccuracy: highAccuracy,
                 timeout: 15000,
                 maximumAge: 10000,
                 distanceFilter: 0,
-                forceRequestLocation: true,
-                forceLocationManager: false,
-                showLocationDialog: true,
+                forceRequestLocation: forceLocation,
+                forceLocationManager: useLocationManager,
+                showLocationDialog: locationDialog,
             },
         );
     };
+
+    const getLocationUpdates = async () => {
+        const hasPermission = await hasLocationPermission();
+
+        if (!hasPermission) {
+            return;
+        }
+
+        if (Platform.OS === 'android' && foregroundService) {
+            await startForegroundService();
+          }
+
+        setObserving(true);
+
+        watchId.current = Geolocation.watchPosition(
+            (position) => {
+                setLocation(position);
+                console.log(position);
+                console.log(new Date(position.timestamp).toLocaleString())
+            },
+            (error) => {
+                setLocation(null);
+                console.log(error);
+            },
+            {
+                accuracy: {
+                    android: 'high',
+                    ios: 'best',
+                },
+                enableHighAccuracy: highAccuracy,
+                distanceFilter: 0,
+                interval: 5000, //Every 5 seconds
+                fastestInterval: 2000,
+                forceRequestLocation: forceLocation,
+                forceLocationManager: useLocationManager,
+                showLocationDialog: locationDialog,
+                useSignificantChanges: significantChanges,
+            },
+        );
+    };
+
+    const removeLocationUpdates = useCallback(() => {
+        if (watchId.current !== null) {
+            stopForegroundService();
+            Geolocation.clearWatch(watchId.current);
+            watchId.current = null;
+            setObserving(false);
+        }
+    }, [stopForegroundService]);
+
+    const startForegroundService = async () => {
+        if (Platform.Version >= 26) {
+            await VIForegroundService.createNotificationChannel({
+                id: 'locationChannel',
+                name: 'Location Tracking Channel',
+                description: 'Tracks location of user',
+                enableVibration: false,
+            });
+        }
+
+        return VIForegroundService.startService({
+            channelId: 'locationChannel',
+            id: 420,
+            title: appConfig.displayName,
+            text: 'Tracking location updates',
+            icon: 'ic_launcher',
+        });
+    };
+
+    const stopForegroundService = useCallback(() => {
+        VIForegroundService.stopService().catch((err) => err);
+    }, []);
 
     useEffect(() => {
         // try {
@@ -201,7 +245,35 @@ const Location = ({ navigation }) => {
                             <Text>{latitude}</Text>
                             <Text>{longitude}</Text>
                             <Text></Text>
-                            <Button title="Open Maps" onPress={() => Linking.openURL(`https://www.google.com/maps/search/${latitude},+${longitude}/@${latitude},${longitude}z`)}/>
+                            <Button title="Open Maps" onPress={() => Linking.openURL(`https://www.google.com/maps/search/${latitude},+${longitude}/@${latitude},${longitude}z`)} />
+                        </View>
+                        <View style={styles.buttons}>
+                            <Button
+                                title="Start Observing"
+                                onPress={getLocationUpdates}
+                                disabled={observing}
+                            />
+                            <Button
+                                title="Stop Observing"
+                                onPress={removeLocationUpdates}
+                                disabled={!observing}
+                            />
+                        </View>
+                        <View style={styles.result}>
+                            <Text>Latitude: {location?.coords?.latitude || ''}</Text>
+                            <Text>Longitude: {location?.coords?.longitude || ''}</Text>
+                            <Text>Heading: {location?.coords?.heading}</Text>
+                            <Text>Accuracy: {location?.coords?.accuracy}</Text>
+                            <Text>Altitude: {location?.coords?.altitude}</Text>
+                            <Text>Altitude Accuracy: {location?.coords?.altitudeAccuracy}</Text>
+                            <Text>Speed: {location?.coords?.speed}</Text>
+                            <Text>Provider: {location?.provider || ''}</Text>
+                            <Text>
+                                Timestamp:{' '}
+                                {location?.timestamp
+                                    ? new Date(location.timestamp).toLocaleString()
+                                    : ''}
+                            </Text>
                         </View>
                     </View>
                 </ScrollView>
@@ -209,5 +281,45 @@ const Location = ({ navigation }) => {
     );
 };
 
+const styles = StyleSheet.create({
+    sectionContainer: {
+        marginTop: 32,
+        paddingHorizontal: 24,
+    },
+    sectionTitle: {
+        fontSize: 24,
+        fontWeight: '600',
+    },
+    sectionDescription: {
+        marginTop: 8,
+        fontSize: 18,
+        fontWeight: '400',
+    },
+    highlight: {
+        fontWeight: '700',
+    },
+    mainView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: "center"
+    },
+    result: {
+        borderWidth: 1,
+        borderColor: '#666',
+        width: '100%',
+        padding: 10,
+    },
+    input: {
+        width: '60%',
+        marginTop: 20,
+        borderStyle: "solid",
+        borderColor: "black",
+        borderWidth: 2
+    },
+    submit: {
+        width: "40%",
+        marginTop: 15,
+    },
+});
 
 export default Location;
