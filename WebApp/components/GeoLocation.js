@@ -7,7 +7,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
+import RNMapView, { Circle, Marker } from 'react-native-maps';
+
 import appConfig from '../app.json';
+import MapView from './MapView';
 
 const Section = ({ children, title }) => {
     const isDarkMode = useColorScheme() === 'dark';
@@ -41,12 +44,13 @@ const GeoLocation = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState();
     const [location, setLocation] = useState(null);
+    const [coords, setCoords] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
     const [latitude, setLatitude] = useState("");
     const [longitude, setLongitude] = useState("");
-
     const [times, setTimes] = useState([]);
 
+    const [text, setText] = useState([]);
 
     //Function to quickly check permissions for foreground and background tasks
     const checkPermissions = async () => {
@@ -76,7 +80,9 @@ const GeoLocation = ({ navigation }) => {
         let currentLocation = await Location.getCurrentPositionAsync({ accuracy: 6 });
         console.log(currentLocation);
         setLocation(currentLocation);
+        let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
 
+        setCoords(geo);
     };
 
     //Define a task to get background updates
@@ -92,12 +98,17 @@ const GeoLocation = ({ navigation }) => {
         }
         if (data) {
             try {
-                // console.log(data)
                 const { locations } = data;
-                console.log(`locations size: ${locations.length}`, locations);
-                setLocation(locations[0]);
-                let dateTime = `${new Date(locations[0].timestamp).toLocaleString()} \n`;
-                setTimes(currentTimes => [...currentTimes, dateTime]);
+                const currentLocation = locations[0];
+
+                // console.log(`locations size: ${locations.length}`, locations);
+                setLocation(currentLocation);
+
+                let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
+
+                setCoords(coords => [...coords, geo]);
+                // let dateTime = `${new Date(locations[0].timestamp).toLocaleString()} \n`;
+                // setTimes(currentTimes => [...currentTimes, dateTime]);
             } catch (error) {
                 console.log('the error', error)
             }
@@ -111,6 +122,9 @@ const GeoLocation = ({ navigation }) => {
         }
 
         let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
+
+        //Clear coords array before gathering coords
+        setCoords([]);
 
         if (!isRegistered) await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_UPDATES_TASK, {
             accuracy: Location.Accuracy.High,
@@ -127,7 +141,23 @@ const GeoLocation = ({ navigation }) => {
 
     //Stop the task to get updates
     const stopLocationUpdates = async () => {
-        Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_UPDATES_TASK);
+        let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
+
+        if (isRegistered) {
+            Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_UPDATES_TASK);
+
+            setText([]);
+
+            if (coords.length > 0) {
+                //send to API
+            }
+
+            coords.forEach(coord => {
+                var newText = `${coord} \n`;
+                setText(text => [...text, newText]);
+            })
+        }
+
     }
 
     useEffect(() => {
@@ -146,8 +176,10 @@ const GeoLocation = ({ navigation }) => {
         //     // error reading value
         //     console.log(e);
         // }
-
-        setIsLoading(false);
+        getLocation().then(() => {
+            setIsLoading(false);
+        })
+        
 
     }, []);
 
@@ -203,9 +235,11 @@ const GeoLocation = ({ navigation }) => {
                                     : ''}
                             </Text>
                         </View>
-                        <View>
-                            <Text>{times}</Text>
-                        </View>
+
+                    </View>
+                    <View style={styles.mapSection}>
+                        {/* <Text>{text}</Text> */}
+                        {<MapView coords={coords || null} />}
                     </View>
                 </ScrollView>
             </SafeAreaView>
@@ -250,6 +284,10 @@ const styles = StyleSheet.create({
     submit: {
         width: "40%",
         marginTop: 15,
+    },
+    mapSection: {
+        flexGrow: 1,
+        height: 600,
     },
 });
 
