@@ -1,5 +1,4 @@
 import React, { useEffect, useCallback, useRef, useState } from 'react';
-import { Node } from 'react';
 import Toast from 'react-native-simple-toast';
 import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, Platform, PermissionsAndroid, useColorScheme, View, Linking, Switch } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
@@ -7,37 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
-import RNMapView, { Circle, Marker } from 'react-native-maps';
-
-import appConfig from '../app.json';
 import MapView from './MapView';
-
-const Section = ({ children, title }) => {
-    const isDarkMode = useColorScheme() === 'dark';
-    return (
-        <View style={styles.sectionContainer}>
-            <Text
-                style={[
-                    styles.sectionTitle,
-                    {
-                        color: isDarkMode ? Colors.white : Colors.black,
-                    },
-                ]}>
-                {title}
-            </Text>
-            <Text
-                style={[
-                    styles.sectionDescription,
-                    {
-                        color: isDarkMode ? Colors.light : Colors.dark,
-                    },
-                ]}>
-                {children}
-            </Text>
-        </View>
-    );
-};
-
 
 const GeoLocation = ({ navigation }) => {
     // debugger;
@@ -78,11 +47,10 @@ const GeoLocation = ({ navigation }) => {
         }
 
         let currentLocation = await Location.getCurrentPositionAsync({ accuracy: 6 });
-        console.log(currentLocation);
         setLocation(currentLocation);
-        let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
+        // let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
 
-        setCoords(geo);
+        // setCoords(geo);
     };
 
     //Define a task to get background updates
@@ -128,7 +96,7 @@ const GeoLocation = ({ navigation }) => {
 
         if (!isRegistered) await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_UPDATES_TASK, {
             accuracy: Location.Accuracy.High,
-            timeInterval: 5000,
+            timeInterval: 2000,
             distanceInterval: 0,
             foregroundService: {
                 notificationTitle: 'Getting location updates',
@@ -179,7 +147,7 @@ const GeoLocation = ({ navigation }) => {
         getLocation().then(() => {
             setIsLoading(false);
         })
-        
+
 
     }, []);
 
@@ -202,11 +170,10 @@ const GeoLocation = ({ navigation }) => {
                     <View style={styles.mainView} >
 
                         <View style={styles.buttonContainer}>
-                            <Button title="Get Location" onPress={getLocation} />
-                            <Text>{latitude}</Text>
+                            {/* <Text>{latitude}</Text>
                             <Text>{longitude}</Text>
                             <Text></Text>
-                            <Button title="Open Maps" onPress={() => Linking.openURL(`https://www.google.com/maps/search/${location?.coords?.latitude || ''},+${location?.coords?.longitude || ''}/@${location?.coords?.latitude || ''},${location?.coords?.longitude || ''}z`)} />
+                            <Button title="Open Maps" onPress={() => Linking.openURL(`https://www.google.com/maps/search/${location?.coords?.latitude || ''},+${location?.coords?.longitude || ''}/@${location?.coords?.latitude || ''},${location?.coords?.longitude || ''}z`)} /> */}
                         </View>
                         <View style={styles.buttons}>
                             <Button
@@ -235,11 +202,11 @@ const GeoLocation = ({ navigation }) => {
                                     : ''}
                             </Text>
                         </View>
-
+                        <Button title="Get Location" onPress={getLocation} />
                     </View>
                     <View style={styles.mapSection}>
                         {/* <Text>{text}</Text> */}
-                        {<MapView coords={coords || null} />}
+                        {<MapView coords={coords || null} location={location.coords} />}
                     </View>
                 </ScrollView>
             </SafeAreaView>
