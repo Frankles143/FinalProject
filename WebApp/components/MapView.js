@@ -22,7 +22,8 @@ const customMapStyle = [
     }
 ]
 
-const MapView = ({ location, coords }) => {
+const MapView = ({ location, coords, newClearMarker }) => {
+    const [clearMarkers, setClearMarkers] = useState(null);
     const [markers, setMarkers] = useState([]);
     const mapRef = useRef(null);
 
@@ -42,11 +43,18 @@ const MapView = ({ location, coords }) => {
                 zoom: 18,
             });
         }
+
         mapMarkers();
-    }, [location]);
+
+        if (newClearMarker > clearMarkers ) {
+            setMarkers([]);
+            setClearMarkers(newClearMarker);
+        }
+
+    }, [location, newClearMarker]);
 
     const mapMarkers = () => {
-        if (coords?.length > 1) {
+        if (coords?.length > 0) {
             let newMarker = <Marker
                 key={coords.length - 1}
                 coordinate={{
@@ -77,9 +85,10 @@ const MapView = ({ location, coords }) => {
                 style={styles.map}
                 rotateEnabled={false}
                 showsPointsOfInterest={false}
-                customMapStyle={customMapStyle}
-            >
+                customMapStyle={customMapStyle} >
+
                 {markers[0] != null && markers}
+
                 <Marker
                     anchor={{ x: 0.5, y: 0.6 }}
                     key={1}
@@ -113,15 +122,6 @@ const MapView = ({ location, coords }) => {
                     strokeColor="rgba(0, 150, 255, 0.25)"
                     fillColor="rgba(0, 150, 255, 0.25)"
                 />
-                {/* {coords[0] != null && coords.map((coord, i) => {
-                    <Marker
-                        key={i}
-                        coordinate={{
-                            latitude: coord[0],
-                            longitude: coord[1]
-                        }}
-                    />
-                })} */}
                 
             </RNMapView>
         </View>
@@ -171,43 +171,3 @@ const styles = StyleSheet.create({
         borderBottomColor: 'rgb(0, 120, 255)',
     },
 });
-
-
-
-// {!!location && (
-//     <>
-//         <Marker
-//             key={1}
-//             anchor={{ x: 0.5, y: 0.6 }}
-//             coordinate={{
-//                 latitude: location.latitude,
-//                 longitude: location.latitude
-//             }}
-//             flat
-//         style={{
-//             ...(location.heading !== -1 && {
-//                 transform: [
-//                     {
-//                         rotate: `${location.heading}deg`,
-//                     },
-//                 ],
-//             }),
-//         }}
-//         >
-//             <View style={styles.dotContainer}>
-//                 <View style={styles.arrow} />
-//                 <View style={styles.dot} />
-//             </View>
-//         </Marker>
-//         {/* Accuracy circle around current user */}
-//         <Circle
-//             center={{
-//                 latitude: location.latitude,
-//                 longitude: location.longitude,
-//             }}
-//             radius={location.accuracy}
-//             strokeColor="rgba(0, 150, 255, 0.25)"
-//             fillColor="rgba(0, 150, 255, 0.25)"
-//         />
-//     </>
-// )}

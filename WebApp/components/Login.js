@@ -153,7 +153,7 @@ const Login = ({ navigation }) => {
                     />
                     <View styles={styles.submit}>
                         <Text></Text>
-                        <Button title="Submit" onPress={() => CheckLoginDetails()} />
+                        <Button title="Submit" onPress={CheckLoginDetails} />
                     </View>
                 </View>
             </ScrollView>

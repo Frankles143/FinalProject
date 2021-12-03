@@ -20,19 +20,19 @@ export const fontSize = {
 
 export const lineHeight = {
     smallest: {
-        fontSize: 20,
+        lineHeight: 20,
     },
     small: {
-        fontSize: 22,
+        lineHeight: 22,
     },
     medium: {
-        fontSize: 24,
+        lineHeight: 24,
     },
     large: {
-        fontSize: 26,
+        lineHeight: 26,
     },
     largest: {
-        fontSize: 32,
+        lineHeight: 32,
     }
 }
 

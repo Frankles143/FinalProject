@@ -9,18 +9,15 @@ import * as TaskManager from 'expo-task-manager';
 import MapView from './MapView';
 import ViewLocationResults from './ViewLocationResults';
 
+import { Spacing } from '../styles';
+
 const GeoLocation = ({ navigation }) => {
     // debugger;
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState();
     const [location, setLocation] = useState(null);
     const [coords, setCoords] = useState(null);
-    const [errorMsg, setErrorMsg] = useState(null);
-    const [latitude, setLatitude] = useState("");
-    const [longitude, setLongitude] = useState("");
-    const [times, setTimes] = useState([]);
-
-    const [text, setText] = useState([]);
+    const [clearMarkers, setClearMarkers] = useState(0);
 
     //Function to quickly check permissions for foreground and background tasks
     const checkPermissions = async () => {
@@ -28,12 +25,12 @@ const GeoLocation = ({ navigation }) => {
         let backStatus = await Location.requestBackgroundPermissionsAsync();
 
         if (foreStatus.status != "granted") {
-            setErrorMsg("Permission to access location was denied!");
+            Toast.show("Permission to access location was denied!");
             return false;
         }
 
         if (backStatus.status != "granted") {
-            setErrorMsg("Permission to access location in the background was denied!")
+            Toast.show("Permission to access location in the background was denied!")
             return false;
         }
 
@@ -46,12 +43,9 @@ const GeoLocation = ({ navigation }) => {
         if (!checkPermissions) {
             return;
         }
-
+    
         let currentLocation = await Location.getCurrentPositionAsync({ accuracy: 6 });
         setLocation(currentLocation);
-        // let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
-
-        // setCoords(geo);
     };
 
     //Define a task to get background updates
@@ -70,14 +64,14 @@ const GeoLocation = ({ navigation }) => {
                 const { locations } = data;
                 const currentLocation = locations[0];
 
-                // console.log(`locations size: ${locations.length}`, locations);
                 setLocation(currentLocation);
 
-                let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
 
+
+                //Extract co-ordinates
+                let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
                 setCoords(coords => [...coords, geo]);
-                // let dateTime = `${new Date(locations[0].timestamp).toLocaleString()} \n`;
-                // setTimes(currentTimes => [...currentTimes, dateTime]);
+                
             } catch (error) {
                 console.log('the error', error)
             }
@@ -113,20 +107,22 @@ const GeoLocation = ({ navigation }) => {
         let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
 
         if (isRegistered) {
+
+            //Pass in boolean for pause/stop and check here
+
             Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_UPDATES_TASK);
 
-            setText([]);
-
+            //If stop then clean and pass through data else do nothing
             if (coords.length > 0) {
                 //send to API
             }
-
-            // coords.forEach(coord => {
-            //     var newText = `${coord} \n`;
-            //     setText(text => [...text, newText]);
-            // })
         }
 
+    }
+
+    const handleClearMarkers = async () => {
+        setCoords([]);
+        setClearMarkers(clearMarkers + 1);
     }
 
     useEffect(() => {
@@ -164,26 +160,28 @@ const GeoLocation = ({ navigation }) => {
             <Text></Text>
             :
             <>
+                <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
                 <SafeAreaView style={backgroundStyle}>
-                    <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
                     <ScrollView
                         contentInsetAdjustmentBehavior="automatic"
-                        style={backgroundStyle}>
+                        style={styles.container}>
+                    {/* <View style={styles.container}> */}
                         <View style={styles.mainView} >
-                            <Button title="Open Maps" onPress={() => Linking.openURL(`https://www.google.com/maps/search/${location?.coords?.latitude || ''},+${location?.coords?.longitude || ''}/@${location?.coords?.latitude || ''},${location?.coords?.longitude || ''}z`)} />
                             <Button
                                 title="Start Observing"
                                 onPress={getLocationUpdates} />
                             <Button
                                 title="Stop Observing"
                                 onPress={stopLocationUpdates} />
+                            {/* <ViewLocationResults location={location} /> */}
+                            <Button title="Clear map markers" onPress={handleClearMarkers}/>
                             <Button title="Get Location" onPress={getLocation} />
-                            {/* <ViewLocationResults location={location}/> */}
                         </View>
                         <View style={styles.mapSection}>
                             {/* <Text>{text}</Text> */}
-                            {<MapView coords={coords || null} location={location.coords} />}
+                            {<MapView coords={coords || null} location={location.coords} newClearMarker={clearMarkers}/>}
                         </View>
+                    {/* </View> */}
                     </ScrollView>
                 </SafeAreaView>
             </>
@@ -191,15 +189,17 @@ const GeoLocation = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+    container: {
+    },
     mainView: {
-        flex: 1,
+        // flex: 1,
+        // height: Spacing.screen.height * 0.90,
         justifyContent: 'center',
         alignItems: "center"
     },
     mapSection: {
-        flexGrow: 1,
-        height: 700,
-        // ...StyleSheet.absoluteFillObject
+        // flex: 9,
+        height: Spacing.screen.height * 0.75,
     },
 });
 
