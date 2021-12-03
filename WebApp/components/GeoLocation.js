@@ -7,6 +7,7 @@ import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
 import MapView from './MapView';
+import ViewLocationResults from './ViewLocationResults';
 
 const GeoLocation = ({ navigation }) => {
     // debugger;
@@ -120,10 +121,10 @@ const GeoLocation = ({ navigation }) => {
                 //send to API
             }
 
-            coords.forEach(coord => {
-                var newText = `${coord} \n`;
-                setText(text => [...text, newText]);
-            })
+            // coords.forEach(coord => {
+            //     var newText = `${coord} \n`;
+            //     setText(text => [...text, newText]);
+            // })
         }
 
     }
@@ -162,99 +163,43 @@ const GeoLocation = ({ navigation }) => {
         isLoading ?
             <Text></Text>
             :
-            <SafeAreaView style={backgroundStyle}>
-                <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-                <ScrollView
-                    contentInsetAdjustmentBehavior="automatic"
-                    style={backgroundStyle}>
-                    <View style={styles.mainView} >
-
-                        <View style={styles.buttonContainer}>
-                            {/* <Text>{latitude}</Text>
-                            <Text>{longitude}</Text>
-                            <Text></Text>
-                            <Button title="Open Maps" onPress={() => Linking.openURL(`https://www.google.com/maps/search/${location?.coords?.latitude || ''},+${location?.coords?.longitude || ''}/@${location?.coords?.latitude || ''},${location?.coords?.longitude || ''}z`)} /> */}
-                        </View>
-                        <View style={styles.buttons}>
+            <>
+                <SafeAreaView style={backgroundStyle}>
+                    <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+                    <ScrollView
+                        contentInsetAdjustmentBehavior="automatic"
+                        style={backgroundStyle}>
+                        <View style={styles.mainView} >
+                            <Button title="Open Maps" onPress={() => Linking.openURL(`https://www.google.com/maps/search/${location?.coords?.latitude || ''},+${location?.coords?.longitude || ''}/@${location?.coords?.latitude || ''},${location?.coords?.longitude || ''}z`)} />
                             <Button
                                 title="Start Observing"
-                                onPress={getLocationUpdates}
-                            // disabled={observing}
-                            />
+                                onPress={getLocationUpdates} />
                             <Button
                                 title="Stop Observing"
-                                onPress={stopLocationUpdates}
-                            // disabled={!observing}
-                            />
+                                onPress={stopLocationUpdates} />
+                            <Button title="Get Location" onPress={getLocation} />
+                            {/* <ViewLocationResults location={location}/> */}
                         </View>
-                        <View style={styles.result}>
-                            <Text>Latitude: {location?.coords?.latitude || ''}</Text>
-                            <Text>Longitude: {location?.coords?.longitude || ''}</Text>
-                            <Text>Heading: {location?.coords?.heading}</Text>
-                            <Text>Accuracy: {location?.coords?.accuracy}</Text>
-                            <Text>Altitude: {location?.coords?.altitude}</Text>
-                            <Text>Altitude Accuracy: {location?.coords?.altitudeAccuracy}</Text>
-                            <Text>Speed: {location?.coords?.speed}</Text>
-                            <Text>
-                                Timestamp:{' '}
-                                {location?.timestamp
-                                    ? new Date(location.timestamp).toLocaleString()
-                                    : ''}
-                            </Text>
+                        <View style={styles.mapSection}>
+                            {/* <Text>{text}</Text> */}
+                            {<MapView coords={coords || null} location={location.coords} />}
                         </View>
-                        <Button title="Get Location" onPress={getLocation} />
-                    </View>
-                    <View style={styles.mapSection}>
-                        {/* <Text>{text}</Text> */}
-                        {<MapView coords={coords || null} location={location.coords} />}
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
+                    </ScrollView>
+                </SafeAreaView>
+            </>
     );
 };
 
 const styles = StyleSheet.create({
-    sectionContainer: {
-        marginTop: 32,
-        paddingHorizontal: 24,
-    },
-    sectionTitle: {
-        fontSize: 24,
-        fontWeight: '600',
-    },
-    sectionDescription: {
-        marginTop: 8,
-        fontSize: 18,
-        fontWeight: '400',
-    },
-    highlight: {
-        fontWeight: '700',
-    },
     mainView: {
         flex: 1,
         justifyContent: 'center',
         alignItems: "center"
     },
-    result: {
-        borderWidth: 1,
-        borderColor: '#666',
-        width: '100%',
-        padding: 10,
-    },
-    input: {
-        width: '60%',
-        marginTop: 20,
-        borderStyle: "solid",
-        borderColor: "black",
-        borderWidth: 2
-    },
-    submit: {
-        width: "40%",
-        marginTop: 15,
-    },
     mapSection: {
         flexGrow: 1,
-        height: 600,
+        height: 700,
+        // ...StyleSheet.absoluteFillObject
     },
 });
 

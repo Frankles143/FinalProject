@@ -1,28 +1,29 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import RNMapView, { Circle, Marker } from 'react-native-maps';
 
-export const customMapStyle = [
+const customMapStyle = [
     {
-      "featureType": "poi.business",
-      "stylers": [
-        {
-          "visibility": "off"
-        }
-      ]
+        "featureType": "poi.business",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
     },
     {
-      "featureType": "poi.park",
-      "elementType": "labels.text",
-      "stylers": [
-        {
-          "visibility": "off"
-        }
-      ]
+        "featureType": "poi.park",
+        "elementType": "labels.text",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
     }
-  ]
+]
 
 const MapView = ({ location, coords }) => {
+    const [markers, setMarkers] = useState([]);
     const mapRef = useRef(null);
 
     //Pass in current location and a series of coords
@@ -41,7 +42,21 @@ const MapView = ({ location, coords }) => {
                 zoom: 18,
             });
         }
+        mapMarkers();
     }, [location]);
+
+    const mapMarkers = () => {
+        if (coords?.length > 1) {
+            let newMarker = <Marker
+                key={coords.length - 1}
+                coordinate={{
+                    latitude: coords[coords.length - 1][0],
+                    longitude: coords[coords.length - 1][1]
+                }}
+            />
+            setMarkers(markers => [...markers, newMarker])
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -62,8 +77,9 @@ const MapView = ({ location, coords }) => {
                 style={styles.map}
                 rotateEnabled={false}
                 showsPointsOfInterest={false}
-                customMapStyle = {customMapStyle}
+                customMapStyle={customMapStyle}
             >
+                {markers[0] != null && markers}
                 <Marker
                     anchor={{ x: 0.5, y: 0.6 }}
                     key={1}
@@ -97,6 +113,16 @@ const MapView = ({ location, coords }) => {
                     strokeColor="rgba(0, 150, 255, 0.25)"
                     fillColor="rgba(0, 150, 255, 0.25)"
                 />
+                {/* {coords[0] != null && coords.map((coord, i) => {
+                    <Marker
+                        key={i}
+                        coordinate={{
+                            latitude: coord[0],
+                            longitude: coord[1]
+                        }}
+                    />
+                })} */}
+                
             </RNMapView>
         </View>
     );
