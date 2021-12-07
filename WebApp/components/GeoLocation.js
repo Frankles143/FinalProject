@@ -9,7 +9,7 @@ import * as TaskManager from 'expo-task-manager';
 import MapView from './MapView';
 import ViewLocationResults from './ViewLocationResults';
 
-import { Spacing } from '../styles';
+import { Spacing, Typography, Colours } from '../styles';
 
 const GeoLocation = ({ navigation }) => {
     // debugger;
@@ -18,6 +18,7 @@ const GeoLocation = ({ navigation }) => {
     const [location, setLocation] = useState(null);
     const [coords, setCoords] = useState(null);
     const [clearMarkers, setClearMarkers] = useState(0);
+    const [isCalibrating, setIsCalibrating] = useState("");
     const [calCount, setCalCount] = useState(0);
 
     //Function to quickly check permissions for foreground and background tasks
@@ -70,6 +71,7 @@ const GeoLocation = ({ navigation }) => {
 
                 //Calibration
                 if (calCount < 5) {
+                    setIsCalibrating("Calibration in progress...");
                     //Get 5 readings, unless the accuracy increases to an acceptable level first
                     if (currentLocation.coords.accuracy < 8 && calCount > 1) {
                         console.log("Accuracy achieved")
@@ -79,13 +81,14 @@ const GeoLocation = ({ navigation }) => {
                         setCalCount(calCount + 1);
                     }
                 } else {
+                    setIsCalibrating("");
                     //Bool flag here for isRecording
                     // Tweak saving algorithm here, save every other coord, check for accuracy etc.
 
                     //Extract co-ordinates
                     let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
                     setCoords(coords => [...coords, geo]);
-                    console.log("Saved")
+                    // console.log("Saved")
                 }
 
             } catch (error) {
@@ -123,6 +126,7 @@ const GeoLocation = ({ navigation }) => {
     //Stop the task to get updates
     const stopLocationUpdates = async (isStop) => {
         let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
+        setIsCalibrating("");
 
         if (isRegistered) {
             setCalCount(0);
@@ -209,23 +213,22 @@ const GeoLocation = ({ navigation }) => {
                         contentInsetAdjustmentBehavior="automatic"
                         style={styles.container}>
                         {/* <View style={styles.container}> */}
-                        <View style={styles.mainView} >
-                            <Button
-                                title="Start Observing"
-                                onPress={getLocationUpdates} />
-                            <Button
-                                title="Stop Observing"
-                                onPress={() => stopLocationUpdates(true)} />
-                            <Button
-                                title="Pause Observing"
-                                onPress={() => stopLocationUpdates(false)} />
+                        <View style={styles.buttonGroup} >
+                            <Button style={styles.button} color={Colours.primary.base} title="Start" onPress={getLocationUpdates} />
+                            <Button style={styles.button} color={Colours.primary.base} title="Stop" onPress={() => stopLocationUpdates(true)} />
+                            <Button style={styles.button} color={Colours.primary.base} title="Pause" onPress={() => stopLocationUpdates(false)} />
                             {/* <ViewLocationResults location={location} /> */}
-                            <Button title="Clear map markers" onPress={handleClearMarkers} />
-                            <Button title="Get Location" onPress={getLocation} />
+                            <Button style={styles.button} color={Colours.primary.base} title="Clear" onPress={handleClearMarkers} />
+                            <Button style={styles.button} color={Colours.primary.base} title="Get" onPress={getLocation} />
                         </View>
                         <View style={styles.mapSection}>
                             {/* <Text>{text}</Text> */}
-                            {<MapView coords={coords || null} location={location.coords} newClearMarker={clearMarkers} />}
+                            <Text styles={styles.cal}>{isCalibrating}</Text>
+                            <MapView coords={coords || null} location={location.coords} newClearMarker={clearMarkers} />
+
+                        </View>
+                        <View>
+
                         </View>
                         {/* </View> */}
                     </ScrollView>
@@ -237,16 +240,23 @@ const GeoLocation = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
     },
-    mainView: {
-        // flex: 1,
-        // height: Spacing.screen.height * 0.90,
-        justifyContent: 'center',
-        alignItems: "center"
+    buttonGroup: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginTop: 15,
+    },
+    button: {
+        width: '40%',
+        // height: 40
     },
     mapSection: {
         // flex: 9,
-        height: Spacing.screen.height * 0.75,
+        height: Spacing.screen.height * 0.845,
     },
+    cal: {
+        ...Typography.body.medium,
+    }
 });
 
 export default GeoLocation;

@@ -22,7 +22,7 @@ export const neutral = {
 
 export const primary = {
     light: "",
-    base: "",
+    base: "#228B22",
     dark: ""
 }
 

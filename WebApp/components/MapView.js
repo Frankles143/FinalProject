@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import RNMapView, { Circle, Marker } from 'react-native-maps';
+import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
 
 const customMapStyle = [
     {
@@ -25,6 +25,7 @@ const customMapStyle = [
 const MapView = ({ location, coords, newClearMarker }) => {
     const [clearMarkers, setClearMarkers] = useState(null);
     const [markers, setMarkers] = useState([]);
+    const [poly, setPoly] = useState(null);
     const mapRef = useRef(null);
 
     //Pass in current location and a series of coords
@@ -44,7 +45,8 @@ const MapView = ({ location, coords, newClearMarker }) => {
             });
         }
 
-        mapMarkers();
+        // mapMarkers();
+        setPolyline();
 
         if (newClearMarker > clearMarkers ) {
             setMarkers([]);
@@ -56,7 +58,6 @@ const MapView = ({ location, coords, newClearMarker }) => {
     const mapMarkers = () => {
         //Check if coords contains anything and if there are more coords than markers
         if (coords?.length > 0 && coords?.length > markers?.length) {
-            console.log(coords.length)
             let newMarker = <Marker
                 key={coords.length - 1}
                 coordinate={{
@@ -65,6 +66,26 @@ const MapView = ({ location, coords, newClearMarker }) => {
                 }}
             />
             setMarkers(markers => [...markers, newMarker])
+        }
+    }
+
+    const setPolyline = () => {
+        if (coords?.length > 0) {
+            //Create LatLng array first
+            let latLng = [];
+            coords.forEach(coord => {
+                latLng = [...latLng, {latitude: coord[0], longitude: coord[1]}];
+            });
+
+            let newPoly = <Polyline
+            coordinates={latLng}
+            strokeWidth={15}
+            strokeColor="#0000FF"
+            />
+
+            setPoly(newPoly);
+        } else {
+            setPoly(null);
         }
     }
 
@@ -90,6 +111,7 @@ const MapView = ({ location, coords, newClearMarker }) => {
                 customMapStyle={customMapStyle} >
 
                 {markers[0] != null && markers}
+                {poly !== null && poly}
 
                 <Marker
                     anchor={{ x: 0.5, y: 0.6 }}
