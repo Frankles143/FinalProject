@@ -40,7 +40,7 @@ const MapView = ({ location, coords, newClearMarker }) => {
                 pitch: 0,
                 heading: 0,
                 altitude: 1000,
-                zoom: 18,
+                // zoom: 18,
             });
         }
 
@@ -54,7 +54,9 @@ const MapView = ({ location, coords, newClearMarker }) => {
     }, [location, newClearMarker]);
 
     const mapMarkers = () => {
-        if (coords?.length > 0) {
+        //Check if coords contains anything and if there are more coords than markers
+        if (coords?.length > 0 && coords?.length > markers?.length) {
+            console.log(coords.length)
             let newMarker = <Marker
                 key={coords.length - 1}
                 coordinate={{
@@ -78,7 +80,7 @@ const MapView = ({ location, coords, newClearMarker }) => {
                     },
                     heading: 0,
                     pitch: 0,
-                    zoom: 11,
+                    zoom: 15,
                 }}
                 loadingEnabled={true}
                 loadingBackgroundColor="white"

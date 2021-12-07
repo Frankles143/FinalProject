@@ -30,10 +30,10 @@ namespace DogWalkNationAPI.Controllers
         }
 
         [HttpGet]
-        [Route("/[controller]/{id}/{key}")]
-        public async Task<IActionResult> GetUser(Guid id, string key)
+        [Route("/[controller]/{id}")]
+        public async Task<IActionResult> GetRoute(Guid id)
         {
-            return Ok(await _routeHelper.Get(id, key));
+            return Ok(await _routeHelper.Get(id, id.ToString()));
         }
 
         [HttpPost]

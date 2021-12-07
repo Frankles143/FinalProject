@@ -18,6 +18,7 @@ const GeoLocation = ({ navigation }) => {
     const [location, setLocation] = useState(null);
     const [coords, setCoords] = useState(null);
     const [clearMarkers, setClearMarkers] = useState(0);
+    const [calCount, setCalCount] = useState(0);
 
     //Function to quickly check permissions for foreground and background tasks
     const checkPermissions = async () => {
@@ -43,7 +44,7 @@ const GeoLocation = ({ navigation }) => {
         if (!checkPermissions) {
             return;
         }
-    
+
         let currentLocation = await Location.getCurrentPositionAsync({ accuracy: 6 });
         setLocation(currentLocation);
     };
@@ -64,14 +65,29 @@ const GeoLocation = ({ navigation }) => {
                 const { locations } = data;
                 const currentLocation = locations[0];
 
+                //Sets users current position
                 setLocation(currentLocation);
 
+                //Calibration
+                if (calCount < 5) {
+                    //Get 5 readings, unless the accuracy increases to an acceptable level first
+                    if (currentLocation.coords.accuracy < 8 && calCount > 1) {
+                        console.log("Accuracy achieved")
+                        setCalCount(5);
+                    } else {
+                        console.log("Calibrating...")
+                        setCalCount(calCount + 1);
+                    }
+                } else {
+                    //Bool flag here for isRecording
+                    // Tweak saving algorithm here, save every other coord, check for accuracy etc.
 
+                    //Extract co-ordinates
+                    let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
+                    setCoords(coords => [...coords, geo]);
+                    console.log("Saved")
+                }
 
-                //Extract co-ordinates
-                let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
-                setCoords(coords => [...coords, geo]);
-                
             } catch (error) {
                 console.log('the error', error)
             }
@@ -84,10 +100,12 @@ const GeoLocation = ({ navigation }) => {
             return;
         }
 
-        let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
+        //Initialise empty array
+        if (coords == null) {
+            setCoords([]);
+        }
 
-        //Clear coords array before gathering coords
-        setCoords([]);
+        let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
 
         if (!isRegistered) await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_UPDATES_TASK, {
             accuracy: Location.Accuracy.High,
@@ -103,21 +121,46 @@ const GeoLocation = ({ navigation }) => {
     }
 
     //Stop the task to get updates
-    const stopLocationUpdates = async () => {
+    const stopLocationUpdates = async (isStop) => {
         let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
 
         if (isRegistered) {
-
-            //Pass in boolean for pause/stop and check here
+            setCalCount(0);
 
             Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_UPDATES_TASK);
 
             //If stop then clean and pass through data else do nothing
-            if (coords.length > 0) {
-                //send to API
+            if (isStop) {
+                if (coords.length > 0) {
+                    //send to API
+                    saveRoute(coords);
+                    console.log("Saved and stopped");
+                }
+            } else {
+                console.log("Paused");
             }
-        }
 
+        }
+    }
+
+    const saveRoute = async (coords) => {
+
+        fetch('https://dogwalknationapi.azurewebsites.net/route/newroute', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                coords
+            )
+        })
+            .then(response => { response.json() })
+            .then(json => {
+                console.log(json);
+                handleClearMarkers();
+                setCoords([]);
+            })
     }
 
     const handleClearMarkers = async () => {
@@ -165,23 +208,26 @@ const GeoLocation = ({ navigation }) => {
                     <ScrollView
                         contentInsetAdjustmentBehavior="automatic"
                         style={styles.container}>
-                    {/* <View style={styles.container}> */}
+                        {/* <View style={styles.container}> */}
                         <View style={styles.mainView} >
                             <Button
                                 title="Start Observing"
                                 onPress={getLocationUpdates} />
                             <Button
                                 title="Stop Observing"
-                                onPress={stopLocationUpdates} />
+                                onPress={() => stopLocationUpdates(true)} />
+                            <Button
+                                title="Pause Observing"
+                                onPress={() => stopLocationUpdates(false)} />
                             {/* <ViewLocationResults location={location} /> */}
-                            <Button title="Clear map markers" onPress={handleClearMarkers}/>
+                            <Button title="Clear map markers" onPress={handleClearMarkers} />
                             <Button title="Get Location" onPress={getLocation} />
                         </View>
                         <View style={styles.mapSection}>
                             {/* <Text>{text}</Text> */}
-                            {<MapView coords={coords || null} location={location.coords} newClearMarker={clearMarkers}/>}
+                            {<MapView coords={coords || null} location={location.coords} newClearMarker={clearMarkers} />}
                         </View>
-                    {/* </View> */}
+                        {/* </View> */}
                     </ScrollView>
                 </SafeAreaView>
             </>
