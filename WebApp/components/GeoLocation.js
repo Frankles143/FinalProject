@@ -137,8 +137,9 @@ const GeoLocation = ({ navigation }) => {
             if (isStop) {
                 if (coords.length > 0) {
                     //send to API
-                    saveRoute(coords);
-                    console.log("Saved and stopped");
+                    saveRoute(coords).then(() => {
+                        console.log("Saved and stopped");
+                    })
                 }
             } else {
                 console.log("Paused");
@@ -170,6 +171,18 @@ const GeoLocation = ({ navigation }) => {
     const handleClearMarkers = async () => {
         setCoords([]);
         setClearMarkers(clearMarkers + 1);
+    }
+
+    const loadRoute = async () => {
+        fetch('https://dogwalknationapi.azurewebsites.net/route/6d8daf72-4ad3-4532-8ce1-6a92a9dc205a')
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                setCoords(data.routeCoords);
+            })
+            .catch((error) => {
+                console.log(error)
+            });
     }
 
     useEffect(() => {
@@ -221,6 +234,7 @@ const GeoLocation = ({ navigation }) => {
                             <Button style={styles.button} color={Colours.primary.base} title="Clear" onPress={handleClearMarkers} />
                             <Button style={styles.button} color={Colours.primary.base} title="Get" onPress={getLocation} />
                         </View>
+                        <View><Button style={styles.button} color={Colours.primary.base} title="Load route" onPress={loadRoute} /></View>
                         <View style={styles.mapSection}>
                             {/* <Text>{text}</Text> */}
                             <Text styles={styles.cal}>{isCalibrating}</Text>

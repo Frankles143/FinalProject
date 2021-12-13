@@ -53,7 +53,7 @@ const MapView = ({ location, coords, newClearMarker }) => {
             setClearMarkers(newClearMarker);
         }
 
-    }, [location, newClearMarker]);
+    }, [location, coords, newClearMarker]);
 
     const mapMarkers = () => {
         //Check if coords contains anything and if there are more coords than markers
@@ -79,7 +79,7 @@ const MapView = ({ location, coords, newClearMarker }) => {
 
             let newPoly = <Polyline
             coordinates={latLng}
-            strokeWidth={15}
+            strokeWidth={10}
             strokeColor="#0000FF"
             />
 
