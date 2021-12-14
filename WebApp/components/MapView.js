@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text, ToastAndroid } from 'react-native';
 import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
+import MapMarker from '../services/MapMarker';
+import Toast from 'react-native-simple-toast';
 
 const customMapStyle = [
     {
@@ -22,38 +24,61 @@ const customMapStyle = [
     }
 ]
 
-const MapView = ({ location, coords, newClearMarker }) => {
+const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
     const [clearMarkers, setClearMarkers] = useState(null);
     const [markers, setMarkers] = useState([]);
     const [poly, setPoly] = useState(null);
+    const [selectedPointStart, setSelectedPointStart] = useState(null);
+    const [selectedPointEnd, setSelectedPointEnd] = useState(null);
+    const [tracks, setTracks] = useState(false);
+    const [instruction, setInstruction] = useState("");
     const mapRef = useRef(null);
 
     //Pass in current location and a series of coords
 
     useEffect(() => {
         console.log(location)
-        if (!!location && mapRef.current) {
-            mapRef.current.animateCamera({
-                center: {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                },
-                pitch: 0,
-                heading: 0,
-                altitude: 1000,
-                // zoom: 18,
-            });
+
+        //If there is a valid location and a map then change to users current position
+        // if (!!location && mapRef.current) {
+        //     mapRef.current.animateCamera({
+        //         center: {
+        //             latitude: location.latitude,
+        //             longitude: location.longitude,
+        //         },
+        //         pitch: 0,
+        //         heading: 0,
+        //         altitude: 1000,
+        //         // zoom: 18,
+        //     });
+        // }
+
+
+        //Change to markers if creating a hazard
+        if (makeHazard == true) {
+            setPoly(null);
+            mapAllMarkers();
+        } else {
+            //Create the polyline of all the points in the users currently created route
+            setSelectedPointStart(null);
+            setSelectedPointEnd(null);
+            setPolyline();
         }
 
-        // mapMarkers();
-        setPolyline();
-
-        if (newClearMarker > clearMarkers ) {
+        //If there is a change in the clear markers value from GeoLocation.js then clear all markers
+        if (newClearMarker > clearMarkers) {
             setMarkers([]);
+            setPoly([]);
             setClearMarkers(newClearMarker);
         }
 
-    }, [location, coords, newClearMarker]);
+        //TracksView is false, until a user touches a point, which makes it true, changes the colours, updates etc.
+        //Trackview changes back to false afterwards for performance benfits but the real time colour change has already happened
+        if (tracks === true) {
+            setTracks(false);
+        }
+
+    }, [location, coords, newClearMarker, makeHazard, selectedPointStart, selectedPointEnd, tracks]);
 
     const mapMarkers = () => {
         //Check if coords contains anything and if there are more coords than markers
@@ -69,18 +94,96 @@ const MapView = ({ location, coords, newClearMarker }) => {
         }
     }
 
+    const mapAllMarkers = () => {
+        if (coords?.length > 0) {
+
+            let tempMarkers = [];
+
+            //Map all the markers now so that the key remains the same so the coords array can be referenced later
+            coords.forEach((coord, i) => {
+
+                let markerColour = "#FF0000";
+
+                //if selected points are null then normal, else colour one, else colour all in between 
+                if (selectedPointStart !== null && selectedPointEnd === null && selectedPointStart === i) {
+                    console.log("first marker changed");
+                    markerColour = "#228B22"
+
+                } else if (selectedPointStart !== null && selectedPointEnd !== null && i >= selectedPointStart && i <= selectedPointEnd) {
+                    console.log("The rest of the markers changed");
+                    markerColour = "#228B22"
+                }
+
+                let tempMarker = <Marker
+                    key={i}
+                    coordinate={{
+                        latitude: coord[0],
+                        longitude: coord[1]
+                    }}
+                    onPress={(e) => handleMarkerSelect(e)}
+                    tracksViewChanges={tracks}
+                >
+                    <View style={styles.dotContainer}>
+                        <View style={{backgroundColor: markerColour, width: 24, height: 24, borderRadius: 12,}} />
+                    </View>
+                </Marker>
+
+                tempMarkers.push(tempMarker);
+            });
+
+            //Remove most of the markers to make it easier for users to see - this could be a changeable variable
+            tempMarkers = tempMarkers.filter((marker, i) => {
+                if (i % 5 === 0) {
+                    return marker
+                }
+            })
+
+            setMarkers(tempMarkers);
+            console.log(tempMarkers);
+        }
+    }
+
+    const handleMarkerSelect = (e) => {
+        //Get key from the event object
+        let markerKey = parseInt(e._targetInst.return.key);
+        setTracks(true);
+
+        //Get first point, then second
+        if (selectedPointStart === null) {
+            setSelectedPointStart(markerKey);
+            setInstruction(`Marker number ${markerKey} selected`);
+
+        } else if (selectedPointStart !== null && selectedPointEnd === null) {
+
+            if (markerKey < selectedPointStart) {
+                Toast.show("Please select two markers in walk order!");
+                setInstruction("");
+            } else {
+                setSelectedPointEnd(markerKey);
+                setInstruction(`Marker number ${markerKey} selected`);
+            }
+        }
+
+        if (selectedPointStart !== null && selectedPointEnd !== null) {
+            setInstruction("Both markers set")
+            console.log("Both points set!")
+        }
+
+    }
+
     const setPolyline = () => {
+        setMarkers([]);
         if (coords?.length > 0) {
             //Create LatLng array first
             let latLng = [];
             coords.forEach(coord => {
-                latLng = [...latLng, {latitude: coord[0], longitude: coord[1]}];
+                latLng = [...latLng, { latitude: coord[0], longitude: coord[1] }];
             });
 
             let newPoly = <Polyline
-            coordinates={latLng}
-            strokeWidth={10}
-            strokeColor="#0000FF"
+                coordinates={latLng}
+                strokeWidth={10}
+                strokeColor="#0000FF"
             />
 
             setPoly(newPoly);
@@ -89,8 +192,15 @@ const MapView = ({ location, coords, newClearMarker }) => {
         }
     }
 
+    //Saving hazard
+    //Foreach
+    //If between key start and end
+    //Marker changes colour (not every i)
+    //Save coord from coords array (every i)
+
     return (
         <View style={styles.container}>
+            <Text>{instruction}</Text>
             <RNMapView
                 ref={mapRef}
                 initialCamera={{
@@ -146,7 +256,7 @@ const MapView = ({ location, coords, newClearMarker }) => {
                     strokeColor="rgba(0, 150, 255, 0.25)"
                     fillColor="rgba(0, 150, 255, 0.25)"
                 />
-                
+
             </RNMapView>
         </View>
     );

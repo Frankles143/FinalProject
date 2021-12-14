@@ -20,6 +20,7 @@ const GeoLocation = ({ navigation }) => {
     const [clearMarkers, setClearMarkers] = useState(0);
     const [isCalibrating, setIsCalibrating] = useState("");
     const [calCount, setCalCount] = useState(0);
+    const [makeHazard, setMakeHazard] = useState(false);
 
     //Function to quickly check permissions for foreground and background tasks
     const checkPermissions = async () => {
@@ -174,7 +175,7 @@ const GeoLocation = ({ navigation }) => {
     }
 
     const loadRoute = async () => {
-        fetch('https://dogwalknationapi.azurewebsites.net/route/6d8daf72-4ad3-4532-8ce1-6a92a9dc205a')
+        fetch('https://dogwalknationapi.azurewebsites.net/route/95e416c2-a948-448e-9545-67cbfd8e2b7c')
             .then((response) => response.json())
             .then((data) => {
                 console.log(data);
@@ -234,11 +235,14 @@ const GeoLocation = ({ navigation }) => {
                             <Button style={styles.button} color={Colours.primary.base} title="Clear" onPress={handleClearMarkers} />
                             <Button style={styles.button} color={Colours.primary.base} title="Get" onPress={getLocation} />
                         </View>
-                        <View><Button style={styles.button} color={Colours.primary.base} title="Load route" onPress={loadRoute} /></View>
+                        <View style={styles.buttonGroup}>
+                            <Button style={styles.button} color={Colours.primary.base} title="Load route" onPress={loadRoute} />
+                            <Button style={styles.button} color={Colours.primary.base} title="Create hazard" onPress={() => setMakeHazard(!makeHazard)} />
+                        </View>
                         <View style={styles.mapSection}>
                             {/* <Text>{text}</Text> */}
                             <Text styles={styles.cal}>{isCalibrating}</Text>
-                            <MapView coords={coords || null} location={location.coords} newClearMarker={clearMarkers} />
+                            <MapView coords={coords || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} />
 
                         </View>
                         <View>
