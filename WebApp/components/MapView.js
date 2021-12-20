@@ -26,7 +26,7 @@ const customMapStyle = [
     }
 ]
 
-const MapView = ({ location, currentRoute, newClearMarker, makeHazard }) => {
+const MapView = ({ location, currentRoute, coords, newClearMarker, makeHazard }) => {
     const [clearMarkers, setClearMarkers] = useState(null);
     const [markers, setMarkers] = useState([]);
     const [poly, setPoly] = useState(null);
@@ -34,8 +34,7 @@ const MapView = ({ location, currentRoute, newClearMarker, makeHazard }) => {
     const [selectedPointEnd, setSelectedPointEnd] = useState(null);
     const [tracks, setTracks] = useState(false);
     const [instruction, setInstruction] = useState("");
-    const [coords, setCoords] = useState(null);
-    const [route, setRoute] = useState(null);
+    const [route, setRoute] = useState(currentRoute);
     const mapRef = useRef(null);
 
     //Pass in current location and a series of coords
@@ -56,7 +55,7 @@ const MapView = ({ location, currentRoute, newClearMarker, makeHazard }) => {
         //     });
         // }
 
-        setCoords(currentRoute?.routeCoords);
+        
         setRoute(currentRoute);
 
         //Change to markers if creating a hazard
@@ -83,7 +82,7 @@ const MapView = ({ location, currentRoute, newClearMarker, makeHazard }) => {
             setTracks(false);
         }
 
-    }, [location, currentRoute, newClearMarker, makeHazard, selectedPointStart, selectedPointEnd, tracks]);
+    }, [location, coords, newClearMarker, makeHazard, selectedPointStart, selectedPointEnd, tracks]);
 
     const mapMarkers = () => {
         //Check if coords contains anything and if there are more coords than markers

@@ -246,7 +246,7 @@ const GeoLocation = ({ navigation }) => {
                         <View style={styles.mapSection}>
                             {/* <Text>{text}</Text> */}
                             <Text styles={styles.cal}>{isCalibrating}</Text>
-                            <MapView currentRoute={route || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} />
+                            <MapView currentRoute={route || null} coords={coords || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} />
 
                         </View>
                         <View>
