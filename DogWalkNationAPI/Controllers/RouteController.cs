@@ -58,5 +58,22 @@ namespace DogWalkNationAPI.Controllers
             }
             
         }
+
+        [HttpPut]
+        [Route("/[controller]/updateRoute")]
+        public async Task<Responses.Default> UpdateRoute(Route route)
+        {
+            try
+            {
+                await _routeHelper.Update(route.RouteId.ToString(), route);
+
+                return new Responses.Default() { Success = true, Message = "Route updated!" };
+            }
+            catch (Exception)
+            {
+                return new Responses.Default() { Success = false, Message = "An error has occurred" };
+                throw;
+            }
+        }
     }
 }

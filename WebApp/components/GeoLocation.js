@@ -16,6 +16,7 @@ const GeoLocation = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState();
     const [location, setLocation] = useState(null);
+    const [route, setRoute] = useState(null);
     const [coords, setCoords] = useState(null);
     const [clearMarkers, setClearMarkers] = useState(0);
     const [isCalibrating, setIsCalibrating] = useState("");
@@ -180,11 +181,14 @@ const GeoLocation = ({ navigation }) => {
             .then((data) => {
                 console.log(data);
                 setCoords(data.routeCoords);
+                setRoute(data);
             })
             .catch((error) => {
                 console.log(error)
             });
     }
+
+    
 
     useEffect(() => {
         // try {
@@ -242,7 +246,7 @@ const GeoLocation = ({ navigation }) => {
                         <View style={styles.mapSection}>
                             {/* <Text>{text}</Text> */}
                             <Text styles={styles.cal}>{isCalibrating}</Text>
-                            <MapView coords={coords || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} />
+                            <MapView currentRoute={route || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} />
 
                         </View>
                         <View>

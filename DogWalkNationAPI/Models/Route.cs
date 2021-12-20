@@ -8,27 +8,53 @@ namespace DogWalkNationAPI.Models
 {
     public class Route
     {
-        public Route(Guid routeId, List<List<double>> coords)
+        public Route(Guid routeId, List<List<double>> routeCoords)
         {
             RouteId = routeId;
-            RouteCoords = coords;
+            RouteCoords = routeCoords;
+        }
+
+        [JsonConstructor]
+        public Route(Guid routeId, Guid walkId, string routeName, List<List<double>> routeCoords, List<Hazard> routeHazards)
+        {
+            RouteId = routeId;
+            WalkId = walkId;
+            RouteName = routeName;
+            RouteCoords = routeCoords;
+            RouteHazards = routeHazards;
         }
 
         public static string ContainerName = "Route";
 
         [JsonProperty(PropertyName = "id")]
         public Guid RouteId { get; set; }
+        [JsonProperty(PropertyName = "walkId")]
         public Guid WalkId { get; set; }
+        [JsonProperty(PropertyName = "routeName")]
         public string RouteName { get; set; }
+        [JsonProperty(PropertyName = "routeCoords")]
         public List<List<double>> RouteCoords { get; set; }
-        public List<Hazards> RouteHazards { get; set; }
+        [JsonProperty(PropertyName = "routeHazards")]
+        public List<Hazard> RouteHazards { get; set; }
     }
 
-    public class Hazards
+    public class Hazard
     {
+        public Hazard(Guid hazardId, string hazardName, string hazardColour, List<List<double>> hazardCoords)
+        {
+            HazardId = hazardId;
+            HazardName = hazardName;
+            HazardColour = hazardColour;
+            HazardCoords = hazardCoords;
+        }
+
+        [JsonProperty(PropertyName = "hazardId")]
         public Guid HazardId { get; set; }
+        [JsonProperty(PropertyName = "hazardName")]
         public string HazardName { get; set; }
+        [JsonProperty(PropertyName = "hazardColour")]
         public string HazardColour { get; set; }
-        public List<string> HazardCoords { get; set; }
+        [JsonProperty(PropertyName = "hazardCoords")]
+        public List<List<double>> HazardCoords { get; set; }
     }
 }

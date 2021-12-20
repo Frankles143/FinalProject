@@ -13,6 +13,8 @@ D:\Git\FinalProject\DogWalkNationAPI\obj\Release\net5.0\PubTmp\Out\Humanizer.dll
 D:\Git\FinalProject\DogWalkNationAPI\obj\Release\net5.0\PubTmp\Out\System.Net.Http.Formatting.dll
 D:\Git\FinalProject\DogWalkNationAPI\obj\Release\net5.0\PubTmp\Out\System.Web.Http.dll
 D:\Git\FinalProject\DogWalkNationAPI\obj\Release\net5.0\PubTmp\Out\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Git\FinalProject\DogWalkNationAPI\obj\Release\net5.0\PubTmp\Out\Microsoft.AspNetCore.JsonPatch.dll
+D:\Git\FinalProject\DogWalkNationAPI\obj\Release\net5.0\PubTmp\Out\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 D:\Git\FinalProject\DogWalkNationAPI\obj\Release\net5.0\PubTmp\Out\Microsoft.AspNetCore.Razor.Language.dll
 D:\Git\FinalProject\DogWalkNationAPI\obj\Release\net5.0\PubTmp\Out\Microsoft.Azure.Cosmos.Client.dll
 D:\Git\FinalProject\DogWalkNationAPI\obj\Release\net5.0\PubTmp\Out\Microsoft.Azure.Cosmos.Core.dll

@@ -35,7 +35,7 @@ namespace DogWalkNationAPI
         {
             services.AddControllers();
             services.AddAutoMapper(typeof(Startup));
-            //services.AddControllers().AddNewtonsoftJson();
+            services.AddControllers().AddNewtonsoftJson();
 
             CosmosClient dbClient = new CosmosClient(Configuration.GetConnectionString("cosmosDb"));
             services.AddSingleton(dbClient);

@@ -149,3 +149,5 @@ D:\Git\FinalProject\DogWalkNationAPI\bin\Release\net5.0\System.Net.Http.Formatti
 D:\Git\FinalProject\DogWalkNationAPI\bin\Release\net5.0\System.Web.Http.dll
 D:\Git\FinalProject\DogWalkNationAPI\bin\Release\net5.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 D:\Git\FinalProject\DogWalkNationAPI\bin\Release\net5.0\Newtonsoft.Json.Bson.dll
+D:\Git\FinalProject\DogWalkNationAPI\bin\Release\net5.0\Microsoft.AspNetCore.JsonPatch.dll
+D:\Git\FinalProject\DogWalkNationAPI\bin\Release\net5.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll

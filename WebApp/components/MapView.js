@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid } from 'react-native';
+import { View, StyleSheet, Text, ToastAndroid, Button } from 'react-native';
 import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
-import MapMarker from '../services/MapMarker';
 import Toast from 'react-native-simple-toast';
+import { v4 as uuidv4 } from 'uuid';
+
+import { Spacing, Typography, Colours } from '../styles';
 
 const customMapStyle = [
     {
@@ -24,7 +26,7 @@ const customMapStyle = [
     }
 ]
 
-const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
+const MapView = ({ location, currentRoute, newClearMarker, makeHazard }) => {
     const [clearMarkers, setClearMarkers] = useState(null);
     const [markers, setMarkers] = useState([]);
     const [poly, setPoly] = useState(null);
@@ -32,12 +34,13 @@ const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
     const [selectedPointEnd, setSelectedPointEnd] = useState(null);
     const [tracks, setTracks] = useState(false);
     const [instruction, setInstruction] = useState("");
+    const [coords, setCoords] = useState(null);
+    const [route, setRoute] = useState(null);
     const mapRef = useRef(null);
 
     //Pass in current location and a series of coords
 
     useEffect(() => {
-        console.log(location)
 
         //If there is a valid location and a map then change to users current position
         // if (!!location && mapRef.current) {
@@ -53,6 +56,8 @@ const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
         //     });
         // }
 
+        setCoords(currentRoute?.routeCoords);
+        setRoute(currentRoute);
 
         //Change to markers if creating a hazard
         if (makeHazard == true) {
@@ -78,7 +83,7 @@ const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
             setTracks(false);
         }
 
-    }, [location, coords, newClearMarker, makeHazard, selectedPointStart, selectedPointEnd, tracks]);
+    }, [location, currentRoute, newClearMarker, makeHazard, selectedPointStart, selectedPointEnd, tracks]);
 
     const mapMarkers = () => {
         //Check if coords contains anything and if there are more coords than markers
@@ -92,7 +97,7 @@ const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
             />
             setMarkers(markers => [...markers, newMarker])
         }
-    }
+    };
 
     const mapAllMarkers = () => {
         if (coords?.length > 0) {
@@ -106,11 +111,9 @@ const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
 
                 //if selected points are null then normal, else colour one, else colour all in between 
                 if (selectedPointStart !== null && selectedPointEnd === null && selectedPointStart === i) {
-                    console.log("first marker changed");
                     markerColour = "#228B22"
 
                 } else if (selectedPointStart !== null && selectedPointEnd !== null && i >= selectedPointStart && i <= selectedPointEnd) {
-                    console.log("The rest of the markers changed");
                     markerColour = "#228B22"
                 }
 
@@ -124,7 +127,7 @@ const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
                     tracksViewChanges={tracks}
                 >
                     <View style={styles.dotContainer}>
-                        <View style={{backgroundColor: markerColour, width: 24, height: 24, borderRadius: 12,}} />
+                        <View style={{ backgroundColor: markerColour, width: 24, height: 24, borderRadius: 12, }} />
                     </View>
                 </Marker>
 
@@ -133,15 +136,14 @@ const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
 
             //Remove most of the markers to make it easier for users to see - this could be a changeable variable
             tempMarkers = tempMarkers.filter((marker, i) => {
-                if (i % 5 === 0) {
+                if (i % 4 === 0 || i === 0 || i === tempMarkers.length - 1) {
                     return marker
                 }
             })
 
             setMarkers(tempMarkers);
-            console.log(tempMarkers);
         }
-    }
+    };
 
     const handleMarkerSelect = (e) => {
         //Get key from the event object
@@ -169,7 +171,7 @@ const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
             console.log("Both points set!")
         }
 
-    }
+    };
 
     const setPolyline = () => {
         setMarkers([]);
@@ -190,17 +192,70 @@ const MapView = ({ location, coords, newClearMarker, makeHazard }) => {
         } else {
             setPoly(null);
         }
-    }
+    };
 
-    //Saving hazard
-    //Foreach
-    //If between key start and end
-    //Marker changes colour (not every i)
-    //Save coord from coords array (every i)
+    const handleSaveHazard = async () => {
+
+        if (selectedPointStart === null || selectedPointEnd === null) {
+            Toast.show("Select two points first!")
+            return;
+        }
+
+        let hazardCoords = [];
+
+        coords.forEach((coord, i) => {
+            if (i >= selectedPointStart && i <= selectedPointEnd) {
+                hazardCoords.push(coord);
+            }
+        });
+
+        if (hazardCoords.length > 0) {
+            saveHazard(hazardCoords);
+        }
+    };
+
+    const saveHazard = async (coords) => {
+        let hazard = {
+            hazardId: uuidv4(),
+            hazardName: "TestName",
+            hazardColour: "green",
+            hazardCoords: coords
+        };
+
+        let updatedRoute = route;
+
+        updatedRoute = {
+            ...updatedRoute,
+            routeHazards: [hazard]
+        }
+
+        fetch('https://dogwalknationapi.azurewebsites.net/route/updateRoute', {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                updatedRoute
+            )
+        })
+            .then((response) => {
+                response.json()
+            })
+            .then((data) => {
+                console.log(data);
+                setRoute(updatedRoute);
+            })
+            .catch((error) => {
+                console.error(error)
+            });
+    };
+
 
     return (
         <View style={styles.container}>
             <Text>{instruction}</Text>
+            <Button style={styles.button} color={Colours.primary.base} title="Save hazard" onPress={handleSaveHazard} />
             <RNMapView
                 ref={mapRef}
                 initialCamera={{
@@ -267,6 +322,16 @@ export default MapView;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    buttonGroup: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginTop: 15,
+    },
+    button: {
+        width: '40%',
+        // height: 40
     },
     map: {
         flex: 1,
