@@ -6,12 +6,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
-import MapView from './MapView';
-import ViewLocationResults from './ViewLocationResults';
+import MapView from './RoutesMapView';
+import ViewLocationResults from '../ViewLocationResults';
 
-import { Spacing, Typography, Colours } from '../styles';
+import { Spacing, Typography, Colours } from '../../styles';
 
-const GeoLocation = ({ navigation }) => {
+const Routes = ({ navigation }) => {
     // debugger;
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState();
@@ -281,4 +281,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default GeoLocation;
+export default Routes;

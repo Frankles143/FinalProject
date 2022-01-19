@@ -114,7 +114,7 @@ const Home = ({ navigation }) => {
                     <Text style={styles.loginText}>Your unique user ID is {user.userId}</Text>
                     <Text style={styles.loginText}>Your username is: {user.username}</Text>
                     <Text></Text>
-                    <Button title="Go to location test" onPress={() => navigation.navigate("Location")} />
+                    <Button title="Go to location test" onPress={() => navigation.navigate("Route")} />
                 </View>
             </ScrollView>
         </SafeAreaView>

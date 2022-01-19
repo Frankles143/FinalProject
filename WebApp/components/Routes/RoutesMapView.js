@@ -4,7 +4,7 @@ import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Spacing, Typography, Colours } from '../styles';
+import { Spacing, Typography, Colours } from '../../styles';
 
 const customMapStyle = [
     {
@@ -26,15 +26,17 @@ const customMapStyle = [
     }
 ]
 
-const MapView = ({ location, currentRoute, coords, newClearMarker, makeHazard }) => {
+const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHazard }) => {
     const [clearMarkers, setClearMarkers] = useState(null);
     const [markers, setMarkers] = useState([]);
     const [poly, setPoly] = useState(null);
+    const [hazardPoly, setHazardPoly] = useState(null);
     const [selectedPointStart, setSelectedPointStart] = useState(null);
     const [selectedPointEnd, setSelectedPointEnd] = useState(null);
     const [tracks, setTracks] = useState(false);
     const [instruction, setInstruction] = useState("");
     const [route, setRoute] = useState(currentRoute);
+    const [hazards, setHazards] = useState([]);
     const mapRef = useRef(null);
 
     //Pass in current location and a series of coords
@@ -55,12 +57,22 @@ const MapView = ({ location, currentRoute, coords, newClearMarker, makeHazard })
         //     });
         // }
 
-        
+
         setRoute(currentRoute);
+
+        //Add any hazards to a hazard array
+        if (currentRoute?.routeHazards?.length > 0) {
+            setHazards([]);
+            for (let i = 0; i < currentRoute.routeHazards.length; i++) {
+                setHazards(hazards => [...hazards, currentRoute.routeHazards[i]]);
+            }
+
+            createHazardPoly();
+        }
 
         //Change to markers if creating a hazard
         if (makeHazard == true) {
-            setPoly(null);
+            clearPolys();
             mapAllMarkers();
         } else {
             //Create the polyline of all the points in the users currently created route
@@ -72,7 +84,7 @@ const MapView = ({ location, currentRoute, coords, newClearMarker, makeHazard })
         //If there is a change in the clear markers value from GeoLocation.js then clear all markers
         if (newClearMarker > clearMarkers) {
             setMarkers([]);
-            setPoly([]);
+            clearPolys();
             setClearMarkers(newClearMarker);
         }
 
@@ -193,6 +205,39 @@ const MapView = ({ location, currentRoute, coords, newClearMarker, makeHazard })
         }
     };
 
+    const createHazardPoly = () => {
+        //If there are hazards then create a poly for each and add to hazard poly array
+        if (hazards.length > 0) {
+            let latLng = [], tempPolys = [];
+
+            hazards.forEach((hazard, i) => {
+                latLng = [];
+                hazard.hazardCoords.forEach(coord => {
+                    latLng = [...latLng, { latitude: coord[0], longitude: coord[1] }];
+                });
+
+                let newPoly = <Polyline
+                    coordinates={latLng}
+                    strokeWidth={11}
+                    strokeColor="#FF0000"
+                    key={i}
+                />
+
+                tempPolys.push(newPoly);
+            });
+
+            console.log(tempPolys);
+            setHazardPoly(tempPolys);
+        } else {
+            setHazardPoly(null);
+        }
+    }
+
+    const clearPolys = () => {
+        setPoly(null);
+        setHazardPoly(null);
+    }
+
     const handleSaveHazard = async () => {
 
         if (selectedPointStart === null || selectedPointEnd === null) {
@@ -214,21 +259,23 @@ const MapView = ({ location, currentRoute, coords, newClearMarker, makeHazard })
     };
 
     const saveHazard = async (coords) => {
-        let hazard = {
+        let newHazard = {
             hazardId: uuidv4(),
-            hazardName: "TestName",
+            hazardName: "TestName3",
             hazardColour: "green",
             hazardCoords: coords
         };
 
         let updatedRoute = route;
+        let hazards = [...updatedRoute.routeHazards];
+        hazards.push(newHazard);
 
         updatedRoute = {
             ...updatedRoute,
-            routeHazards: [hazard]
+            routeHazards: hazards
         }
 
-        fetch('https://dogwalknationapi.azurewebsites.net/route/updateRoute', {
+        fetch('https://dogwalknationapi.azurewebsites.net/Route/updateRoute', {
             method: 'PUT',
             headers: {
                 Accept: 'application/json',
@@ -239,6 +286,7 @@ const MapView = ({ location, currentRoute, coords, newClearMarker, makeHazard })
             )
         })
             .then((response) => {
+                console.log(response);
                 response.json()
             })
             .then((data) => {
@@ -276,6 +324,7 @@ const MapView = ({ location, currentRoute, coords, newClearMarker, makeHazard })
 
                 {markers[0] != null && markers}
                 {poly !== null && poly}
+                {hazardPoly !== null && hazardPoly}
 
                 <Marker
                     anchor={{ x: 0.5, y: 0.6 }}
@@ -316,7 +365,7 @@ const MapView = ({ location, currentRoute, coords, newClearMarker, makeHazard })
     );
 };
 
-export default MapView;
+export default RoutesMapView;
 
 const styles = StyleSheet.create({
     container: {
