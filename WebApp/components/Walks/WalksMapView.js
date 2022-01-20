@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ToastAndroid, Button } from 'react-native';
-import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
+import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -32,8 +32,44 @@ const WalksMapView = ({ location, walks }) => {
 
     useEffect(() => {
         //Create markers for the walks and put them on map
-        console.log(location)
+        // console.log(location)
+        // console.log(walks);
+        createWalkMarkers();
+
     }, [location, walks]);
+
+    const createWalkMarkers = () => {
+        if (walks.length > 0) {
+
+            let tempMarkers = [];
+
+            walks.forEach((walk, i) => {
+
+                let tempMarker = <Marker
+                    key={i}
+                    coordinate={{
+                        latitude: walk.walkCoords[0],
+                        longitude: walk.walkCoords[1]
+                    }}
+                    // onPress={(e) => handleMarkerSelect(e)}
+                >
+                    <Callout>
+                        <Text>{walk.walkName}</Text>
+                    </Callout>
+                </Marker>
+
+                tempMarkers.push(tempMarker);
+            });
+
+            setMarkers(tempMarkers);
+        }
+    }
+
+    const handleMarkerSelect = (e) => {
+        // console.log(e._targetInst.return.key);
+        let walk = walks[parseInt(e._targetInst.return.key)];
+        console.log(walk);
+    }
 
     return (
         <View style={styles.container}>
@@ -47,7 +83,7 @@ const WalksMapView = ({ location, walks }) => {
                     },
                     heading: 0,
                     pitch: 0,
-                    zoom: 15,
+                    zoom: 12,
                 }}
                 loadingEnabled={true}
                 loadingBackgroundColor="white"
@@ -56,7 +92,7 @@ const WalksMapView = ({ location, walks }) => {
                 showsPointsOfInterest={false}
                 customMapStyle={customMapStyle} >
 
-                {/* {markers[0] != null && markers} */}
+                {markers[0] != null && markers}
 
                 <Marker
                     anchor={{ x: 0.5, y: 0.6 }}

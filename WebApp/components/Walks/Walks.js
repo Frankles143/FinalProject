@@ -16,14 +16,31 @@ const Walks = ({ navigation }) => {
     // debugger;
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState();
+    const [walks, setWalks] = useState([]);
     const [location, setLocation] = useState(null);
 
     useEffect(() => {
-        getLocation().then((location) => {
-            setLocation(location);
-            setIsLoading(false);
+        getWalks().then((walks) => {
+            getLocation().then((location) => {
+                setLocation(location);
+                setIsLoading(false);
+            })
         })
+
     }, []);
+
+    const getWalks = async () => {
+        console.log("getting walks")
+        fetch('https://dogwalknationapi.azurewebsites.net/walk/allWalks')
+            .then((response) => response.json())
+            .then((data) => {
+                // console.log(data);
+                setWalks(data);
+            })
+            .catch((error) => {
+                console.log(error)
+            });
+    }
 
     const isDarkMode = useColorScheme() === 'dark';
 
@@ -42,7 +59,7 @@ const Walks = ({ navigation }) => {
                         contentInsetAdjustmentBehavior="automatic"
                         style={styles.container}>
                         <View style={styles.mapSection}>
-                            <WalksMapView location={location.coords} />
+                            <WalksMapView location={location.coords} walks={walks}/>
                         </View>
                     </ScrollView>
                 </SafeAreaView>
