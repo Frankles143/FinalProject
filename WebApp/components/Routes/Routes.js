@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
-import MapView from './RoutesMapView';
+import RoutesMapView from './RoutesMapView';
 import ViewLocationResults from '../ViewLocationResults';
 
 import { Spacing, Typography, Colours } from '../../styles';
@@ -246,7 +246,7 @@ const Routes = ({ navigation }) => {
                         <View style={styles.mapSection}>
                             {/* <Text>{text}</Text> */}
                             <Text styles={styles.cal}>{isCalibrating}</Text>
-                            <MapView currentRoute={route || null} coords={coords || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} />
+                            <RoutesMapView currentRoute={route || null} coords={coords || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} />
 
                         </View>
                         <View>
