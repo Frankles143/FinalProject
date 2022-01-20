@@ -5,6 +5,7 @@ import Toast from 'react-native-simple-toast';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Spacing, Typography, Colours } from '../../styles';
+import WalkCallout from './WalkCallout';
 
 const customMapStyle = [
     {
@@ -54,7 +55,7 @@ const WalksMapView = ({ location, walks }) => {
                     // onPress={(e) => handleMarkerSelect(e)}
                 >
                     <Callout>
-                        <Text>{walk.walkName}</Text>
+                        <WalkCallout walk={walk} />
                     </Callout>
                 </Marker>
 
