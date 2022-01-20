@@ -8,21 +8,48 @@ namespace DogWalkNationAPI.Models
 {
     public class Walk
     {
+        public Walk(Guid walkId, string walkName, List<double> walkCoords)
+        {
+            WalkId = walkId;
+            WalkName = walkName;
+            WalkCoords = walkCoords;
+        }
+
         public static string ContainerName = "Walk";
 
         [JsonProperty(PropertyName = "id")]
-        public string WalkId { get; set; }
+        public Guid WalkId { get; set; }
+        [JsonProperty(PropertyName = "walkName")]
         public string WalkName { get; set; }
-        public string[] RouteIds { get; set; }
+        [JsonProperty(PropertyName = "walkCoords")]
+        public List<double> WalkCoords { get; set; }
+        [JsonProperty(PropertyName = "walkRoutes")]
+        public List<Guid> WalkRoutes { get; set; }
+        [JsonProperty(PropertyName = "walkFlags")]
         public List<Flags> Flags { get; set; }
+        [JsonProperty(PropertyName = "walkComments")]
         public List<string> CommentIds { get; set; }
+    }
+
+    public class NewWalk
+    {
+        [JsonProperty(PropertyName = "walkName")]
+        public string WalkName { get; set; }
+        [JsonProperty(PropertyName = "walkCoords")]
+        public List<double> WalkCoords { get; set; }
     }
 
     public class Flags
     {
+        [JsonProperty(PropertyName = "flagId")]
         public string FlagId { get; set; }
+        [JsonProperty(PropertyName = "flagName")]
         public string FlagName { get; set; }
+        [JsonProperty(PropertyName = "flagTrue")]
         public int FlagTrue { get; set; }
+        [JsonProperty(PropertyName = "flagFalse")]
         public int FlagFalse { get; set; }
+        [JsonProperty(PropertyName = "flagActive")]
+        public bool FlagActive { get; set; }
     }
 }
