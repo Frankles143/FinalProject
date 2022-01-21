@@ -27,7 +27,7 @@ const customMapStyle = [
     }
 ]
 
-const WalksMapView = ({ location, walks }) => {
+const WalksMapView = ({ navigation, location, walks }) => {
     const [markers, setMarkers] = useState([]);
     const mapRef = useRef(null);
 
@@ -54,7 +54,7 @@ const WalksMapView = ({ location, walks }) => {
                     }}
                     // onPress={(e) => handleMarkerSelect(e)}
                 >
-                    <Callout>
+                    <Callout onPress={() => navigation.navigate('WalkDetails', {walk: walk})}>
                         <WalkCallout walk={walk} />
                     </Callout>
                 </Marker>

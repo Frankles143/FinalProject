@@ -34,7 +34,7 @@ const Walks = ({ navigation }) => {
         fetch('https://dogwalknationapi.azurewebsites.net/walk/allWalks')
             .then((response) => response.json())
             .then((data) => {
-                // console.log(data);
+                console.log(data);
                 setWalks(data);
             })
             .catch((error) => {
