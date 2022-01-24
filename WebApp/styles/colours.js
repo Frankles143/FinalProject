@@ -21,15 +21,15 @@ export const neutral = {
 }
 
 export const primary = {
-    light: "",
+    light: "#2eba2e",
     base: "#228B22",
-    dark: ""
+    dark: "#165c16"
 }
 
 export const secondary = {
-    light: "",
-    base: "",
-    dark: ""
+    light: "#3131ca",
+    base: "#22228b",
+    dark: "#1a1a6b"
 }
 
 export const success = {

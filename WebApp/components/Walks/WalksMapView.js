@@ -54,7 +54,7 @@ const WalksMapView = ({ navigation, location, walks }) => {
                     }}
                     // onPress={(e) => handleMarkerSelect(e)}
                 >
-                    <Callout onPress={() => navigation.navigate('WalkDetails', {walk: walk})}>
+                    <Callout onPress={() => navigation.navigate('Walk Details', {name: walk.walkName, walk: walk})}>
                         <WalkCallout walk={walk} />
                     </Callout>
                 </Marker>
@@ -86,11 +86,12 @@ const WalksMapView = ({ navigation, location, walks }) => {
                     pitch: 0,
                     zoom: 12,
                 }}
-                loadingEnabled={true}
+                loadingEnabled={false}
                 loadingBackgroundColor="white"
                 style={styles.map}
                 rotateEnabled={false}
                 showsPointsOfInterest={false}
+                toolbarEnabled={false}
                 customMapStyle={customMapStyle} >
 
                 {markers[0] != null && markers}

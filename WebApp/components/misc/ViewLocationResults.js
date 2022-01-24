@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Typography } from '../styles';
+import { Typography } from '../../styles';
 
 const ViewLocationResults = ({ location }) => {
 

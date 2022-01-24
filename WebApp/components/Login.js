@@ -4,6 +4,7 @@ import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInpu
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import Loading from './misc/Loading';
 
 const styles = StyleSheet.create({
     sectionContainer: {
@@ -43,36 +44,9 @@ const styles = StyleSheet.create({
     },
 });
 
-
-const Section = ({ children, title }) => {
-    const isDarkMode = useColorScheme() === 'dark';
-    return (
-        <View style={styles.sectionContainer}>
-            <Text
-                style={[
-                    styles.sectionTitle,
-                    {
-                        color: isDarkMode ? Colors.white : Colors.black,
-                    },
-                ]}>
-                {title}
-            </Text>
-            <Text
-                style={[
-                    styles.sectionDescription,
-                    {
-                        color: isDarkMode ? Colors.light : Colors.dark,
-                    },
-                ]}>
-                {children}
-            </Text>
-        </View>
-    );
-};
-
-
 const Login = ({ navigation }) => {
     // debugger;
+    const [isLoading, setIsLoading] = React.useState(false);
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
@@ -84,6 +58,8 @@ const Login = ({ navigation }) => {
 
     const CheckLoginDetails = () => {
         if (email !== "" && password !== "") {
+
+            setIsLoading(true);
 
             var loginUser = {
                 email: email,
@@ -116,16 +92,20 @@ const Login = ({ navigation }) => {
                             } catch (e) {
                                 // saving error
                                 console.log(e)
+                                setIsLoading(false);
                             }
                         } else {
                             Toast.show(json.message);
+                            setIsLoading(false);
                         }
                     } else {
                         Toast.show("Please enter a valid email address")
+                        setIsLoading(false);
                     }
                 })
                 .catch((error) => {
                     console.error(error);
+                    setIsLoading(false);
                 })
         } else {
             Toast.show("Please enter a username and password!")
@@ -133,6 +113,9 @@ const Login = ({ navigation }) => {
     }
 
     return (
+        isLoading ? 
+        <Loading /> 
+        :
         <SafeAreaView style={backgroundStyle}>
             <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
             <ScrollView

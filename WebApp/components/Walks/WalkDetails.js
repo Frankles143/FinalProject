@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 
 import { Typography } from '../../styles';
+import Loading from '../misc/Loading';
 
 const WalkDetails = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +19,7 @@ const WalkDetails = ({ navigation, route }) => {
 
     return (
         isLoading ? 
-        <Text>Loading...</Text>
+        <Loading />
         :
         <Text>Hello <Text style={styles.walkName}>{walk.walkName}</Text></Text>
     )

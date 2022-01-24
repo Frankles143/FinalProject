@@ -68,31 +68,31 @@ export const body = {
     smallest: {
         ...fontSize.smallest,
         ...lineHeight.smallest,
-        ...Colours.neutral.grey10,
+        color: Colours.neutral.grey10,
         fontWeight: "normal"
     },
     small: {
         ...fontSize.small,
         ...lineHeight.small,
-        ...Colours.neutral.grey10,
+        color: Colours.neutral.grey10,
         fontWeight: "normal"
     },
     medium: {
         ...fontSize.medium,
         ...lineHeight.medium,
-        ...Colours.neutral.grey10,
+        color: Colours.neutral.grey10,
         fontWeight: "normal"
     },
     large: {
         ...fontSize.large,
         ...lineHeight.large,
-        ...Colours.neutral.grey10,
+        color: Colours.neutral.grey10,
         fontWeight: "normal"
     },
     largest: {
         ...fontSize.largest,
         ...lineHeight.largest,
-        ...Colours.neutral.grey10,
+        color: Colours.neutral.grey10,
         fontWeight: "normal"
     },
 }

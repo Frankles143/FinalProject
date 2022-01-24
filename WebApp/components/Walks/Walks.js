@@ -1,16 +1,14 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Toast from 'react-native-simple-toast';
-import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, Platform, PermissionsAndroid, useColorScheme, View, Linking, Switch } from 'react-native';
+import {  SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, useColorScheme, View} from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Location from 'expo-location';
-import * as TaskManager from 'expo-task-manager';
 import { getLocation } from '../../services/LocationServices';
 
 import WalksMapView from './WalksMapView';
-import ViewLocationResults from '../ViewLocationResults';
 
 import { Spacing, Typography, Colours } from '../../styles';
+import Loading from '../misc/Loading';
 
 const Walks = ({ navigation }) => {
     // debugger;
@@ -50,7 +48,7 @@ const Walks = ({ navigation }) => {
 
     return (
         isLoading ?
-            <Text>Loading</Text>
+            <Loading />
             :
             <>
                 <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
@@ -59,7 +57,7 @@ const Walks = ({ navigation }) => {
                         contentInsetAdjustmentBehavior="automatic"
                         style={styles.container}>
                         <View style={styles.mapSection}>
-                            <WalksMapView location={location.coords} walks={walks}/>
+                            <WalksMapView location={location.coords} walks={walks} navigation={navigation}/>
                         </View>
                     </ScrollView>
                 </SafeAreaView>

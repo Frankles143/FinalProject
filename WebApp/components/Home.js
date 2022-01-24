@@ -3,6 +3,7 @@ import { Node } from 'react';
 import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Loading from './misc/Loading';
 
 const styles = StyleSheet.create({
     sectionContainer: {
@@ -102,7 +103,7 @@ const Home = ({ navigation }) => {
 
     return (
         isLoading ?
-        <Text></Text>
+        <Loading />
         :
         <SafeAreaView style={backgroundStyle}>
             <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />

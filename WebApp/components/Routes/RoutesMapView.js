@@ -315,11 +315,12 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
                     pitch: 0,
                     zoom: 15,
                 }}
-                loadingEnabled={true}
+                loadingEnabled={false}
                 loadingBackgroundColor="white"
                 style={styles.map}
                 rotateEnabled={false}
                 showsPointsOfInterest={false}
+                toolbarEnabled={false}
                 customMapStyle={customMapStyle} >
 
                 {markers[0] != null && markers}

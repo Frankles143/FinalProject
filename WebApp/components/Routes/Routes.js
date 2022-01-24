@@ -7,9 +7,10 @@ import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
 import RoutesMapView from './RoutesMapView';
-import ViewLocationResults from '../ViewLocationResults';
+import ViewLocationResults from '../misc/ViewLocationResults';
 
 import { Spacing, Typography, Colours } from '../../styles';
+import Loading from '../misc/Loading';
 
 const Routes = ({ navigation }) => {
     // debugger;
@@ -222,7 +223,7 @@ const Routes = ({ navigation }) => {
 
     return (
         isLoading ?
-            <Text></Text>
+            <Loading />
             :
             <>
                 <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
