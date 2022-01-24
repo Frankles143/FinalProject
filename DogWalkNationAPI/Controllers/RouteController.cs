@@ -20,13 +20,28 @@ namespace DogWalkNationAPI.Controllers
             _routeHelper = new CosmosService<Route>(dbClient, Route.ContainerName);
         }
 
-        [HttpGet]
-        [Route("/[controller]/allRoutes")]
-        public async Task<IActionResult> GetAllRoutes()
+        [HttpPost]
+        [Route("/[controller]/getRoutes")]
+        public async Task<Responses.DefaultWithRoutes> GetRoutes(RouteIds ids)
         {
-            //This will become all routes for a specific walk
-            var query = new QueryDefinition("SELECT * FROM c");
-            return Ok(await _routeHelper.GetMultiple(query));
+            List<Route> routes = new();
+
+            try
+            {
+                //Go through all the ids in the list in the RouteIds object and return the routes
+                for (int i = 0; i < ids.Ids.Count; i++)
+                {
+                    routes.Add(await _routeHelper.Get(ids.Ids[i], ids.Ids[i].ToString()));
+                }
+
+                return new Responses.DefaultWithRoutes() { Success = true, Message = "Routes found", Routes = routes };
+            }
+            catch (Exception)
+            {
+                return new Responses.DefaultWithRoutes() { Success = false, Message = "An error has occurred", Routes = null };
+                throw;
+            }
+            
         }
 
         [HttpGet]

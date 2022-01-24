@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DogWalkNationAPI.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,12 +25,18 @@ namespace DogWalkNationAPI.Services
         public class DefaultWithUser : Default
         {
             [JsonProperty]
-            public Models.User User { get; set; }
+            public User User { get; set; }
         }
         public class DefaultWithUserAndToken : DefaultWithUser
         {
             [JsonProperty]
             public string Token { get; set; }
+        }
+
+        public class DefaultWithRoutes : Default
+        {
+            [JsonProperty]
+            public List<Route> Routes { get; set; }
         }
     }
 }

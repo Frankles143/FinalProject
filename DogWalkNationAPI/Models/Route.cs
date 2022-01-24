@@ -38,6 +38,12 @@ namespace DogWalkNationAPI.Models
         public List<Hazard> RouteHazards { get; set; }
     }
 
+    public class RouteIds
+    {
+        [JsonProperty(PropertyName = "ids")]
+        public List<Guid> Ids { get; set; }
+    }
+
     public class Hazard
     {
         public Hazard(Guid hazardId, string hazardName, string hazardColour, List<List<double>> hazardCoords)
