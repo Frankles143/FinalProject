@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ToastAndroid, Button } from 'react-native';
 import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
@@ -30,6 +30,7 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
     const [clearMarkers, setClearMarkers] = useState(null);
     const [markers, setMarkers] = useState([]);
     const [poly, setPoly] = useState(null);
+    const [polyLatLng, setPolyLatLng] = useState(null);
     const [hazardPoly, setHazardPoly] = useState(null);
     const [selectedPointStart, setSelectedPointStart] = useState(null);
     const [selectedPointEnd, setSelectedPointEnd] = useState(null);
@@ -37,38 +38,13 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
     const [instruction, setInstruction] = useState("");
     const [route, setRoute] = useState(currentRoute);
     const [hazards, setHazards] = useState([]);
+
     const mapRef = useRef(null);
 
     //Pass in current location and a series of coords
 
     useEffect(() => {
-
-        //If there is a valid location and a map then change to users current position
-        // if (!!location && mapRef.current) {
-        //     mapRef.current.animateCamera({
-        //         center: {
-        //             latitude: location.latitude,
-        //             longitude: location.longitude,
-        //         },
-        //         pitch: 0,
-        //         heading: 0,
-        //         altitude: 1000,
-        //         // zoom: 18,
-        //     });
-        // }
-
-
         setRoute(currentRoute);
-
-        //Add any hazards to a hazard array
-        if (currentRoute?.routeHazards?.length > 0) {
-            setHazards([]);
-            for (let i = 0; i < currentRoute.routeHazards.length; i++) {
-                setHazards(hazards => [...hazards, currentRoute.routeHazards[i]]);
-            }
-
-            createHazardPoly();
-        }
 
         //Change to markers if creating a hazard
         if (makeHazard == true) {
@@ -79,9 +55,10 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
             setSelectedPointStart(null);
             setSelectedPointEnd(null);
             setPolyline();
+            createHazardPoly();
         }
 
-        //If there is a change in the clear markers value from GeoLocation.js then clear all markers
+        //If there is a change in the clear markers value from Routes.js then clear all markers
         if (newClearMarker > clearMarkers) {
             setMarkers([]);
             clearPolys();
@@ -186,6 +163,8 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
 
     const setPolyline = () => {
         setMarkers([]);
+
+        //Check if there are coordinates
         if (coords?.length > 0) {
             //Create LatLng array first
             let latLng = [];
@@ -198,7 +177,8 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
                 strokeWidth={10}
                 strokeColor="#0000FF"
             />
-
+            //Set the poly and also the coords for the route
+            setPolyLatLng(latLng);
             setPoly(newPoly);
         } else {
             setPoly(null);
@@ -207,10 +187,19 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
 
     const createHazardPoly = () => {
         //If there are hazards then create a poly for each and add to hazard poly array
-        if (hazards.length > 0) {
+        if (currentRoute?.routeHazards?.length > 0) {
+            setHazards([]);
+            let tempHazards = [];
+
+            //Add any hazards to a hazard array
+            for (let i = 0; i < currentRoute.routeHazards.length; i++) {
+                tempHazards.push(currentRoute.routeHazards[i])
+            }
+
             let latLng = [], tempPolys = [];
 
-            hazards.forEach((hazard, i) => {
+            //Create poly for each hazard
+            tempHazards.forEach((hazard, i) => {
                 latLng = [];
                 hazard.hazardCoords.forEach(coord => {
                     latLng = [...latLng, { latitude: coord[0], longitude: coord[1] }];
@@ -225,8 +214,8 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
 
                 tempPolys.push(newPoly);
             });
-
-            console.log(tempPolys);
+            //Set hazards and hazard poly
+            setHazards(tempHazards);
             setHazardPoly(tempPolys);
         } else {
             setHazardPoly(null);
@@ -301,8 +290,8 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
 
     return (
         <View style={styles.container}>
-            <Text>{instruction}</Text>
-            <Button style={styles.button} color={Colours.primary.base} title="Save hazard" onPress={handleSaveHazard} />
+            {/* <Text>{instruction}</Text>
+            <Button style={styles.button} color={Colours.primary.base} title="Save hazard" onPress={handleSaveHazard} /> */}
             <RNMapView
                 ref={mapRef}
                 initialCamera={{
@@ -321,7 +310,23 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
                 rotateEnabled={false}
                 showsPointsOfInterest={false}
                 toolbarEnabled={false}
-                customMapStyle={customMapStyle} >
+                customMapStyle={customMapStyle}
+                onMapReady={() => {
+                    //This timeout is dumb but it's the only way to get the library to work with fitToCoordinates
+                    setTimeout(() => {
+                        mapRef.current.fitToCoordinates(polyLatLng, {
+                            animated: true,
+                            edgePadding: {
+                                top: 15,
+                                right: 15,
+                                bottom: 15,
+                                left: 15
+                            }
+                        });
+                    }, 1000);
+                }}
+
+            >
 
                 {markers[0] != null && markers}
                 {poly !== null && poly}
@@ -334,19 +339,8 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
                         latitude: location.latitude,
                         longitude: location.longitude
                     }}
-                    flat
-                // style={{
-                //     ...(location.heading !== -1 && {
-                //         transform: [
-                //             {
-                //                 rotate: `${location.heading}deg`,
-                //             },
-                //         ],
-                //     }),
-                // }}
-                >
+                    flat>
                     <View style={styles.dotContainer}>
-                        {/* <View style={styles.arrow} /> */}
                         <View style={styles.dot} />
                     </View>
                 </Marker>
@@ -362,7 +356,7 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
                 />
 
             </RNMapView>
-        </View>
+        </View >
     );
 };
 

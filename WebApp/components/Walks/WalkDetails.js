@@ -53,7 +53,6 @@ const WalkDetails = ({ navigation, route }) => {
         let routeOuts = [], hazards;
 
         routes.forEach((route, i) => {
-            console.log(route)
             if (route.routeHazards.length > 0) {
                 hazards = route.routeHazards.length;
             } else {
@@ -97,7 +96,10 @@ const WalkDetails = ({ navigation, route }) => {
                 </View>
 
                 <View style={styles.commentView}>
-
+                    <Text style={styles.header}>Comments</Text>
+                    <ScrollView contentInsetAdjustmentBehavior='automatic'>
+                            
+                        </ScrollView>
                 </View>
             </View>
     )

@@ -3,6 +3,7 @@ import Toast from 'react-native-simple-toast';
 import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, Platform, PermissionsAndroid, useColorScheme, View, Linking, Switch } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getLocation } from '../../services/LocationServices';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
@@ -12,46 +13,32 @@ import ViewLocationResults from '../misc/ViewLocationResults';
 import { Spacing, Typography, Colours } from '../../styles';
 import Loading from '../misc/Loading';
 
-const Routes = ({ navigation }) => {
+const Routes = ({ navigation, route }) => {
     // debugger;
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState();
     const [location, setLocation] = useState(null);
-    const [route, setRoute] = useState(null);
+    const [currentRoute, setCurrentRoute] = useState(null);
     const [coords, setCoords] = useState(null);
     const [clearMarkers, setClearMarkers] = useState(0);
     const [isCalibrating, setIsCalibrating] = useState("");
     const [calCount, setCalCount] = useState(0);
     const [makeHazard, setMakeHazard] = useState(false);
 
-    //Function to quickly check permissions for foreground and background tasks
-    const checkPermissions = async () => {
-        let foreStatus = await Location.requestForegroundPermissionsAsync();
-        let backStatus = await Location.requestBackgroundPermissionsAsync();
+    useEffect(() => {
 
-        if (foreStatus.status != "granted") {
-            Toast.show("Permission to access location was denied!");
-            return false;
-        }
+        getLocation().then((location) => {
+            setLocation(location);
 
-        if (backStatus.status != "granted") {
-            Toast.show("Permission to access location in the background was denied!")
-            return false;
-        }
-
-        return true;
-    }
-
-    //Get current location
-    const getLocation = async () => {
-
-        if (!checkPermissions) {
-            return;
-        }
-
-        let currentLocation = await Location.getCurrentPositionAsync({ accuracy: 6 });
-        setLocation(currentLocation);
-    };
+            //If there is a current route, set it and coords
+            if (route.params?.currentRoute) {
+                console.log(route.params.currentRoute)
+                setCoords(route.params.currentRoute.routeCoords);
+                setCurrentRoute(route.params.currentRoute);
+            }
+            setIsLoading(false);
+        })
+    }, []);
 
     //Define a task to get background updates
     const BACKGROUND_LOCATION_UPDATES_TASK = 'background-location-updates'
@@ -176,43 +163,18 @@ const Routes = ({ navigation }) => {
         setClearMarkers(clearMarkers + 1);
     }
 
-    const loadRoute = async () => {
-        fetch('https://dogwalknationapi.azurewebsites.net/route/95e416c2-a948-448e-9545-67cbfd8e2b7c')
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data);
-                setCoords(data.routeCoords);
-                setRoute(data);
-            })
-            .catch((error) => {
-                console.log(error)
-            });
-    }
-
-    
-
-    useEffect(() => {
-        // try {
-        //     AsyncStorage.getItem("User")
-        //         .then((value) => {
-        //             if (value !== null) {
-        //                 var JsonValue = JSON.parse(value);
-        //                 setUser(JsonValue);
-        //                 setIsLoading(false);
-
-
-        //             }
-        //         })
-        // } catch (e) {
-        //     // error reading value
-        //     console.log(e);
-        // }
-        getLocation().then(() => {
-            setIsLoading(false);
-        })
-
-
-    }, []);
+    // const loadRoute = async () => {
+    //     fetch('https://dogwalknationapi.azurewebsites.net/route/95e416c2-a948-448e-9545-67cbfd8e2b7c')
+    //         .then((response) => response.json())
+    //         .then((data) => {
+    //             console.log(data);
+    //             setCoords(data.routeCoords);
+    //             setCurrentRoute(data);
+    //         })
+    //         .catch((error) => {
+    //             console.log(error)
+    //         });
+    // }
 
     const isDarkMode = useColorScheme() === 'dark';
 
@@ -232,27 +194,27 @@ const Routes = ({ navigation }) => {
                         contentInsetAdjustmentBehavior="automatic"
                         style={styles.container}>
                         {/* <View style={styles.container}> */}
-                        <View style={styles.buttonGroup} >
+                        {/* <View style={styles.buttonGroup} >
                             <Button style={styles.button} color={Colours.primary.base} title="Start" onPress={getLocationUpdates} />
                             <Button style={styles.button} color={Colours.primary.base} title="Stop" onPress={() => stopLocationUpdates(true)} />
                             <Button style={styles.button} color={Colours.primary.base} title="Pause" onPress={() => stopLocationUpdates(false)} />
-                            {/* <ViewLocationResults location={location} /> */}
+                            <ViewLocationResults location={location} />
                             <Button style={styles.button} color={Colours.primary.base} title="Clear" onPress={handleClearMarkers} />
                             <Button style={styles.button} color={Colours.primary.base} title="Get" onPress={getLocation} />
-                        </View>
-                        <View style={styles.buttonGroup}>
+                        </View> */}
+                        {/* <View style={styles.buttonGroup}>
                             <Button style={styles.button} color={Colours.primary.base} title="Load route" onPress={loadRoute} />
                             <Button style={styles.button} color={Colours.primary.base} title="Create hazard" onPress={() => setMakeHazard(!makeHazard)} />
-                        </View>
+                        </View> */}
                         <View style={styles.mapSection}>
                             {/* <Text>{text}</Text> */}
-                            <Text styles={styles.cal}>{isCalibrating}</Text>
-                            <RoutesMapView currentRoute={route || null} coords={coords || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} />
+                            {/* <Text styles={styles.cal}>{isCalibrating}</Text> */}
+                            <RoutesMapView currentRoute={currentRoute || null} coords={coords || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} />
 
                         </View>
-                        <View>
+                        {/* <View>
 
-                        </View>
+                        </View> */}
                         {/* </View> */}
                     </ScrollView>
                 </SafeAreaView>
@@ -275,7 +237,7 @@ const styles = StyleSheet.create({
     },
     mapSection: {
         // flex: 9,
-        height: Spacing.screen.height * 0.845,
+        height: Spacing.screen.height * 0.9,
     },
     cal: {
         ...Typography.body.medium,
