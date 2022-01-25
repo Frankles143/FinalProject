@@ -42,11 +42,11 @@ namespace DogWalkNationAPI.Controllers
             Guid walkId = Guid.NewGuid();
 
             //Create walk object
-            Walk newWalk = new(walkId, walk.WalkName, walk.WalkCoords);
+            Walk newWalk = new(walkId, walk.WalkName, walk.WalkDesc, walk.WalkCoords);
 
             try
             {
-                await _walkHelper.Update(walkId.ToString(), newWalk);
+                await _walkHelper.Add(walkId.ToString(), newWalk);
 
                 return new Responses.Default() { Success = true, Message = "Walk created" };
             }

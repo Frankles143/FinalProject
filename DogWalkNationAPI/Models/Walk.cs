@@ -8,10 +8,11 @@ namespace DogWalkNationAPI.Models
 {
     public class Walk
     {
-        public Walk(Guid walkId, string walkName, List<double> walkCoords)
+        public Walk(Guid walkId, string walkName, string walkDesc, List<double> walkCoords)
         {
             WalkId = walkId;
             WalkName = walkName;
+            WalkDesc = walkDesc;
             WalkCoords = walkCoords;
         }
 
@@ -21,6 +22,8 @@ namespace DogWalkNationAPI.Models
         public Guid WalkId { get; set; }
         [JsonProperty(PropertyName = "walkName")]
         public string WalkName { get; set; }
+        [JsonProperty(PropertyName = "walkDesc")]
+        public string WalkDesc { get; set; }
         [JsonProperty(PropertyName = "walkCoords")]
         public List<double> WalkCoords { get; set; }
         [JsonProperty(PropertyName = "walkRoutes")]
@@ -28,13 +31,15 @@ namespace DogWalkNationAPI.Models
         [JsonProperty(PropertyName = "walkFlags")]
         public List<Flags> Flags { get; set; }
         [JsonProperty(PropertyName = "walkComments")]
-        public List<string> CommentIds { get; set; }
+        public List<Guid> CommentIds { get; set; }
     }
 
     public class NewWalk
     {
         [JsonProperty(PropertyName = "walkName")]
         public string WalkName { get; set; }
+        [JsonProperty(PropertyName = "walkDesc")]
+        public string WalkDesc { get; set; }
         [JsonProperty(PropertyName = "walkCoords")]
         public List<double> WalkCoords { get; set; }
     }

@@ -139,7 +139,7 @@ const Routes = ({ navigation, route }) => {
     }
 
     const saveRoute = async (coords) => {
-
+        //This won't work now, needs to send a full Route object
         fetch('https://dogwalknationapi.azurewebsites.net/route/newroute', {
             method: 'POST',
             headers: {

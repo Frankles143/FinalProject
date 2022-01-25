@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button } from 'react-native';
+import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity } from 'react-native';
 import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -52,9 +52,9 @@ const WalksMapView = ({ navigation, location, walks }) => {
                         latitude: walk.walkCoords[0],
                         longitude: walk.walkCoords[1]
                     }}
-                    // onPress={(e) => handleMarkerSelect(e)}
+                // onPress={(e) => handleMarkerSelect(e)}
                 >
-                    <Callout onPress={() => navigation.navigate('Walk Details', {name: walk.walkName, walk: walk})}>
+                    <Callout onPress={() => navigation.navigate('Walk Details', { name: walk.walkName, walk: walk })}>
                         <WalkCallout walk={walk} />
                     </Callout>
                 </Marker>
@@ -121,7 +121,13 @@ const WalksMapView = ({ navigation, location, walks }) => {
                     fillColor="rgba(0, 150, 255, 0.25)"
                 />
 
+
             </RNMapView>
+            <View style={styles.fabCon}>
+                <TouchableOpacity style={styles.fab} onPress={() => { console.log("waaaaaaaaa") }} >
+                    <Text style={styles.fabText}>+</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 
@@ -131,15 +137,24 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    buttonGroup: {
+    fabCon: {
         flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        marginTop: 15,
+        position: "absolute",
+        bottom: 15,
+        right: 15,
     },
-    button: {
-        width: '40%',
-        // height: 40
+    fab: {
+        backgroundColor: Colours.primary.base,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        height: 70,
+        width: 70,
+        borderRadius: 100,
+    },
+    fabText: {
+        fontSize: 50,
+        color: "white",
     },
     map: {
         flex: 1,

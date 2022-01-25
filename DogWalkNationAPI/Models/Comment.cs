@@ -11,7 +11,7 @@ namespace DogWalkNationAPI.Models
         public static string ContainerName = "Comment";
 
         [JsonProperty(PropertyName = "id")]
-        public string CommentId { get; set; }
+        public Guid CommentId { get; set; }
         public string UserId { get; set; }
         public DateTime Timestamp { get; set; }
         public string CommentBody { get; set; }

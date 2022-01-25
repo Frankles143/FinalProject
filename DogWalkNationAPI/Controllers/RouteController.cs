@@ -52,8 +52,8 @@ namespace DogWalkNationAPI.Controllers
         }
 
         [HttpPost]
-        [Route("/[controller]/newRoute")]
-        public async Task<Responses.Default> CreateNewRoute(List<List<double>> coords)
+        [Route("/[controller]/newEmptyRoute")]
+        public async Task<Responses.Default> CreateNewEmptyRoute(List<List<double>> coords)
         {
             Guid routeId = Guid.NewGuid();
 
@@ -62,7 +62,7 @@ namespace DogWalkNationAPI.Controllers
 
             try
             {
-                await _routeHelper.Update(routeId.ToString(), newRoute);
+                await _routeHelper.Add(routeId.ToString(), newRoute);
 
                 return new Responses.Default() { Success = true, Message = "Route created" };
             }
@@ -72,6 +72,24 @@ namespace DogWalkNationAPI.Controllers
                 throw;
             }
             
+        }
+
+        [HttpPost]
+        [Route("/[controller]/newRoute")]
+        public async Task<Responses.Default> CreateNewRoute(Route newRoute)
+        {
+            try
+            {
+                await _routeHelper.Add(newRoute.RouteId.ToString(), newRoute);
+
+                return new Responses.Default() { Success = true, Message = "Route created" };
+            }
+            catch (Exception)
+            {
+                return new Responses.Default() { Success = false, Message = "An error has occurred" };
+                throw;
+            }
+
         }
 
         [HttpPut]

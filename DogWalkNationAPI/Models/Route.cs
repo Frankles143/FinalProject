@@ -15,10 +15,11 @@ namespace DogWalkNationAPI.Models
         }
 
         [JsonConstructor]
-        public Route(Guid routeId, string routeName, List<List<double>> routeCoords, List<Hazard> routeHazards)
+        public Route(Guid routeId, string routeName, string routeDesc, List<List<double>> routeCoords, List<Hazard> routeHazards)
         {
             RouteId = routeId;
             RouteName = routeName;
+            RouteDesc = routeDesc;
             RouteCoords = routeCoords;
             RouteHazards = routeHazards;
         }
@@ -29,6 +30,8 @@ namespace DogWalkNationAPI.Models
         public Guid RouteId { get; set; }
         [JsonProperty(PropertyName = "routeName")]
         public string RouteName { get; set; }
+        [JsonProperty(PropertyName = "routeDesc")]
+        public string RouteDesc { get; set; }
         [JsonProperty(PropertyName = "routeCoords")]
         public List<List<double>> RouteCoords { get; set; }
         [JsonProperty(PropertyName = "routeHazards")]

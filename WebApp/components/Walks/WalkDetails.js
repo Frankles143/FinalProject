@@ -87,7 +87,7 @@ const WalkDetails = ({ navigation, route }) => {
                     <View style={styles.routeView}>
                         <Text style={styles.header}>{walk.walkName}</Text>
                         <ScrollView contentInsetAdjustmentBehavior='automatic'>
-                            <Text style={styles.body}>Walk description</Text>
+                            <Text style={styles.body}>{walk.walkDesc}</Text>
                             <Text style={styles.body}>Tap on a route to view it!</Text>
                             <View style={styles.break}></View>
                             {!routeOutput ? <Text style={[styles.header, styles.noRoutes]}>No routes!</Text> : routeOutput}
