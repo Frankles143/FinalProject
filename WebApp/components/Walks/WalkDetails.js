@@ -52,7 +52,7 @@ const WalkDetails = ({ navigation, route }) => {
     const handleRoutes = (routes) => {
         let routeOuts = [], hazards;
 
-        routes.forEach(route => {
+        routes.forEach((route, i) => {
             console.log(route)
             if (route.routeHazards.length > 0) {
                 hazards = route.routeHazards.length;
@@ -61,7 +61,7 @@ const WalkDetails = ({ navigation, route }) => {
             }
 
             var tempRouteOut =
-                <TouchableHighlight onPress={() => navigation.navigate("Routes", {currentRoute: route})} underlayColor="white">
+                <TouchableHighlight key={i} onPress={() => navigation.navigate("Routes", {currentRoute: route})} underlayColor="white">
                     <View>
                         <Text></Text>
                         <Text style={styles.body}>Route name: {route.routeName}</Text>
