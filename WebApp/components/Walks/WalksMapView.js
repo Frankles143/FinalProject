@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity, Alert } from 'react-native';
 import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -66,11 +66,21 @@ const WalksMapView = ({ navigation, location, walks }) => {
         }
     }
 
-    const handleMarkerSelect = (e) => {
-        // console.log(e._targetInst.return.key);
-        let walk = walks[parseInt(e._targetInst.return.key)];
-        console.log(walk);
-    }
+    const confirmCreateWalk = () =>
+    Alert.alert(
+      "Create new walk?",
+      "Would you like to create a new walk location?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        { text: "Confirm", onPress: () => navigation.navigate("New Walk") }
+      ],
+      {
+        cancelable: true,
+      }
+    );
 
     return (
         <View style={styles.container}>
@@ -124,9 +134,9 @@ const WalksMapView = ({ navigation, location, walks }) => {
 
             </RNMapView>
             <View style={styles.fabCon}>
-                <TouchableOpacity style={styles.fab} onPress={() => { console.log("waaaaaaaaa") }} >
-                    <Text style={styles.fabText}>+</Text>
-                </TouchableOpacity>
+                <TouchableHighlight style={styles.fab} onPress={() => confirmCreateWalk() } underlayColor={Colours.primary.light} >
+                    <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>+</Text>
+                </TouchableHighlight>
             </View>
         </View>
     );
@@ -145,20 +155,17 @@ const styles = StyleSheet.create({
     },
     fab: {
         backgroundColor: Colours.primary.base,
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        height: 70,
-        width: 70,
+        height: 50,
+        width: 50,
         borderRadius: 100,
     },
     fabText: {
         fontSize: 50,
         color: "white",
+        textAlign: 'center',
     },
     map: {
         flex: 1,
-        //   ...StyleSheet.absoluteFillObject,
     },
     dotContainer: {
         justifyContent: 'center',

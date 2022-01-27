@@ -41,5 +41,6 @@ export const warning = {
 }
 
 export const danger = {
+    light: "#e11919",
     base: "#cf1717"
 }
