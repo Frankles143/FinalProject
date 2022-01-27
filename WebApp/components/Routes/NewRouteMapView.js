@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Spacing, Typography, Colours } from '../../styles';
 import Loading from '../misc/Loading';
-import WalkCallout from './WalkCallout';
+// import WalkCallout from './WalkCallout';
 
 const customMapStyle = [
     {
@@ -28,46 +28,48 @@ const customMapStyle = [
     }
 ]
 
-const NewWalkMapView = ({ navigation, location }) => {
+const NewRouteMapView = ({ navigation, location }) => {
+    const [recording, setRecording] = useState(false);
+    const [paused, setPaused] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
-    const [newWalkLocation, setNewWalkLocation] = useState(null);
-    const [walkName, setWalkName] = useState("");
-    const [walkDesc, setWalkDesc] = useState("");
+    const [newRouteCoords, setNewRouteCoords] = useState(null);
+    const [routeName, setRouteName] = useState("");
+    const [routeDesc, setRouteDesc] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
     const mapRef = useRef(null);
 
     useEffect(() => {
         setModalVisible(false);
-        newWalkTutorial();
+        // newRouteTutorial();
 
     }, [location]);
 
-    const newWalkTutorial = () => {
+    const newRouteTutorial = () => {
         Alert.alert(
-            "Creating a new walk location",
-            "Tap a point on the map to create a marker for the location of your new walk! Keep tapping to move the marker and click Create when you are done."
+            "Creating a new route for a walk",
+            `To start putting your coordinates onto the map, press go. 
+Press pause if you want to take a break, and press continue to keep going. 
+If you want to reset then press stop to remove current route, then press go to start creating a new route.`
         );
     }
 
-    const handleNewWalk = () => {
-        if (walkName !== "" && walkDesc !== "") {
+    const handleNewRoute = () => {
+        if (routeName !== "" && routeDesc !== "") {
             setIsLoading(true);
 
-            let newWalk = {
-                walkName: walkName,
-                walkDesc: walkDesc,
-                walkCoords: [newWalkLocation.latitude, newWalkLocation.longitude],
+            let newRoute = {
+
             };
 
-            fetch('https://dogwalknationapi.azurewebsites.net/Walk/newWalk', {
+            fetch('https://dogwalknationapi.azurewebsites.net/Route/newRoute', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(
-                    newWalk
+                    newRoute
                 )
             })
                 .then(response => response.json())
@@ -82,14 +84,14 @@ const NewWalkMapView = ({ navigation, location }) => {
             // setIsComplete(true);
             // setTimeout(() => { goBackHandler(); }, 3000);
         } else {
-            Toast.show("Please enter a walk name and description!")
+            Toast.show("Please enter a route name and description!")
         }
     }
 
     function goBackHandler() {
         setModalVisible(false);
         //Go back to walks page without a back button, the random number ensures that a refresh happens on return
-        navigation.navigate("Walks", {refresh: Math.random()});
+        navigation.navigate("Walks", { refresh: Math.random() });
     }
 
     return (
@@ -113,7 +115,8 @@ const NewWalkMapView = ({ navigation, location }) => {
                 showsPointsOfInterest={false}
                 toolbarEnabled={false}
                 customMapStyle={customMapStyle}
-                onPress={(e) => setNewWalkLocation(e.nativeEvent.coordinate)} >
+            // onPress={(e) => setNewWalkLocation(e.nativeEvent.coordinate)} 
+            >
 
                 {/* Current location */}
                 <Marker
@@ -132,7 +135,7 @@ const NewWalkMapView = ({ navigation, location }) => {
 
                 {/* Anywhere you touch, create a marker there */}
                 {
-                    newWalkLocation && <Marker coordinate={newWalkLocation} />
+                    // newWalkLocation && <Marker coordinate={newWalkLocation} />
                 }
 
 
@@ -148,11 +151,44 @@ const NewWalkMapView = ({ navigation, location }) => {
                 />
 
             </RNMapView>
-            <View style={styles.fabCon}>
-                <TouchableHighlight style={styles.fab} onPress={() => setModalVisible(true)} underlayColor={Colours.primary.light} >
-                    <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Create</Text>
-                </TouchableHighlight>
-            </View>
+
+            {
+                recording ?
+                    //Recording, stop and pause button
+                    <>
+                        {
+                            paused ?
+                                //Currently paused, show continue button
+                                <View style={styles.fabConLeft}>
+                                    <TouchableHighlight style={styles.fab} onPress={() => setPaused(false)} underlayColor={Colours.primary.light} >
+                                        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Continue</Text>
+                                    </TouchableHighlight>
+                                </View>
+                                :
+                                //Not paused, show pause button
+                                <View style={styles.fabConLeft}>
+                                    <TouchableHighlight style={styles.fab} onPress={() => setPaused(true)} underlayColor={Colours.primary.light} >
+                                        <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Pause</Text>
+                                    </TouchableHighlight>
+                                </View>
+                        }
+                        <View style={styles.fabConRight}>
+                            <TouchableHighlight style={styles.fab} onPress={() => setRecording(false)} underlayColor={Colours.primary.light} >
+                                <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Stop</Text>
+                            </TouchableHighlight>
+                        </View>
+                    </>
+                    :
+                    //Not recording, just go button
+                    <View style={styles.fabConRight}>
+                        <TouchableHighlight style={styles.fab} onPress={() => setRecording(true)} underlayColor={Colours.primary.light} >
+                            <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Go</Text>
+                        </TouchableHighlight>
+                    </View>
+            }
+
+
+
 
             <Modal animationType="fade" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
                 <View style={styles.centeredView}>
@@ -165,24 +201,24 @@ const NewWalkMapView = ({ navigation, location }) => {
                                     <Text style={styles.modalHeader}>Successfully Added!</Text>
                                     :
                                     <>
-                                        <Text style={styles.modalHeader}>Create new walk?</Text>
-                                        {!newWalkLocation ?
-                                            <Text style={styles.modalText}>Please place a marker on the map where you would like your walk location to be!</Text>
+                                        <Text style={styles.modalHeader}>Create new route?</Text>
+                                        {!newRouteCoords ?
+                                            <Text style={styles.modalText}>You must have some coordinates to create a route!</Text>
                                             :
                                             <>
                                                 <Text style={styles.modalText}>Enter a name for the walk and a description to tell people what kind of place this is.</Text>
                                                 <TextInput
                                                     style={styles.input}
-                                                    onChangeText={(text) => setWalkName(text)}
-                                                    value={walkName}
-                                                    placeholder="Walk Name"
+                                                    onChangeText={(text) => setRouteName(text)}
+                                                    value={routeName}
+                                                    placeholder="Route Name"
                                                 />
                                                 <TextInput
                                                     multiline
                                                     style={styles.input}
-                                                    onChangeText={(text) => setWalkDesc(text)}
-                                                    value={walkDesc}
-                                                    placeholder="Walk Description"
+                                                    onChangeText={(text) => setRoutekDesc(text)}
+                                                    value={routeDesc}
+                                                    placeholder="Route Description"
                                                 />
                                             </>
                                         }
@@ -192,7 +228,7 @@ const NewWalkMapView = ({ navigation, location }) => {
                                                 <Text style={styles.textStyle}>Close</Text>
                                             </TouchableHighlight>
                                             {
-                                                newWalkLocation &&
+                                                newRouteCoords &&
                                                 <TouchableHighlight style={[styles.button, styles.buttonConfirm]} onPress={() => handleNewWalk()} underlayColor={Colours.primary.light}>
                                                     <Text style={styles.textStyle}>Confirm</Text>
                                                 </TouchableHighlight>
@@ -219,11 +255,17 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    fabCon: {
+    fabConRight: {
         flex: 1,
         position: "absolute",
         bottom: 15,
         right: 15,
+    },
+    fabConLeft: {
+        flex: 1,
+        position: "absolute",
+        bottom: 15,
+        left: 15,
     },
     fab: {
         backgroundColor: Colours.primary.base,
@@ -232,7 +274,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     fabText: {
-        fontSize: 25,
+        fontSize: 24,
         paddingTop: 8,
         color: "white",
         textAlign: "center",
@@ -325,4 +367,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default NewWalkMapView;
+export default NewRouteMapView;

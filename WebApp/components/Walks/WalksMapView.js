@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity, Alert } from 'react-native';
 import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
@@ -38,6 +38,17 @@ const WalksMapView = ({ navigation, location, walks }) => {
         createWalkMarkers();
 
     }, [location, walks]);
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Button title="New Walk" 
+                color={Colours.primary.base} 
+                accessibilityLabel="This opens a dialog to confirm creation of a new walk" 
+                onPress={() => confirmCreateWalk()} />
+            ),
+        });
+    }, [navigation])
 
     const createWalkMarkers = () => {
         if (walks.length > 0) {
@@ -133,11 +144,11 @@ const WalksMapView = ({ navigation, location, walks }) => {
 
 
             </RNMapView>
-            <View style={styles.fabCon}>
+            {/* <View style={styles.fabCon}>
                 <TouchableHighlight style={styles.fab} onPress={() => confirmCreateWalk() } underlayColor={Colours.primary.light} >
                     <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>+</Text>
                 </TouchableHighlight>
-            </View>
+            </View> */}
         </View>
     );
 

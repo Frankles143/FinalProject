@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, TouchableHighlight } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { View, StyleSheet, Text, ScrollView, TouchableHighlight, Button, Alert } from 'react-native';
 
 import { Colours, Typography } from '../../styles';
 import { body } from '../../styles/typography';
@@ -18,6 +18,33 @@ const WalkDetails = ({ navigation, route }) => {
             getRoutes(route.params?.walk);
         }
     }, [route.params?.walk]);
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Button title="New Route"
+                color={Colours.primary.base} 
+                accessibilityLabel="This opens a dialog to confirm creation of a new route" 
+                onPress={() => confirmCreateRoute()} />
+            ),
+        });
+    }, [navigation])
+
+    const confirmCreateRoute = () =>
+    Alert.alert(
+      "Create new route?",
+      "Would you like to create a new route for this walk?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        { text: "Confirm", onPress: () => navigation.navigate("New Route") }
+      ],
+      {
+        cancelable: true,
+      }
+    );
 
     const getRoutes = (walk) => {
         let routeIds = {
