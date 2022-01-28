@@ -28,11 +28,14 @@ const customMapStyle = [
     }
 ]
 
-const NewRouteMapView = ({ navigation, location }) => {
+const NewRouteMapView = ({ navigation, location, coords, walk, newClearMarkers, getLocationUpdates, stopLocationUpdates }) => {
+    const [clearMarkers, setClearMarkers] = useState(null);
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
+    const [poly, setPoly] = useState(null);
+    const [polyLatLng, setPolyLatLng] = useState(null);
     const [newRouteCoords, setNewRouteCoords] = useState(null);
     const [routeName, setRouteName] = useState("");
     const [routeDesc, setRouteDesc] = useState("");
@@ -42,6 +45,13 @@ const NewRouteMapView = ({ navigation, location }) => {
     useEffect(() => {
         setModalVisible(false);
         // newRouteTutorial();
+        console.log(walk);
+        setPolyline();
+
+        if (newClearMarkers > clearMarkers) {
+            clearPolys();
+            setClearMarkers(newClearMarkers);
+        }
 
     }, [location]);
 
@@ -62,27 +72,27 @@ If you want to reset then press stop to remove current route, then press go to s
 
             };
 
-            fetch('https://dogwalknationapi.azurewebsites.net/Route/newRoute', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(
-                    newRoute
-                )
-            })
-                .then(response => response.json())
-                .then((data) => {
-                    setIsLoading(false);
-                    setIsComplete(true);
-                    setTimeout(() => { goBackHandler(); }, 3000);
-                })
-                .catch((error) => console.error(error));
+            // fetch('https://dogwalknationapi.azurewebsites.net/Route/newRoute', {
+            //     method: 'POST',
+            //     headers: {
+            //         Accept: 'application/json',
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify(
+            //         newRoute
+            //     )
+            // })
+            //     .then(response => response.json())
+            //     .then((data) => {
+            //         setIsLoading(false);
+            //         setIsComplete(true);
+            //         setTimeout(() => { goBackHandler(); }, 3000);
+            //     })
+            //     .catch((error) => console.error(error));
 
-            // setIsLoading(false);
-            // setIsComplete(true);
-            // setTimeout(() => { goBackHandler(); }, 3000);
+            setIsLoading(false);
+            setIsComplete(true);
+            setTimeout(() => { goBackHandler(); }, 3000);
         } else {
             Toast.show("Please enter a route name and description!")
         }
@@ -92,6 +102,50 @@ If you want to reset then press stop to remove current route, then press go to s
         setModalVisible(false);
         //Go back to walks page without a back button, the random number ensures that a refresh happens on return
         navigation.navigate("Walks", { refresh: Math.random() });
+    }
+
+    const setPolyline = () => {
+        // setMarkers([]);
+
+        //Check if there are coordinates
+        if (coords?.length > 0) {
+            //Create LatLng array first
+            let latLng = [];
+            coords.forEach(coord => {
+                latLng = [...latLng, { latitude: coord[0], longitude: coord[1] }];
+            });
+
+            let newPoly = <Polyline
+                coordinates={latLng}
+                strokeWidth={10}
+                strokeColor="#0000FF"
+            />
+            //Set the poly and also the coords for the route
+            setPolyLatLng(latLng);
+            setPoly(newPoly);
+        } else {
+            setPoly(null);
+        }
+    };
+
+    const handleRecording = (bool) => {
+        setRecording(bool);
+
+        if (bool === true) {
+            getLocationUpdates();
+        } else if (bool === false) {
+            stopLocationUpdates(true);
+        }
+    }
+
+    const handlePaused = (bool) => {
+        setPaused(bool);
+
+        if (bool === false) {
+            getLocationUpdates();
+        } else if (bool === false) {
+            stopLocationUpdates(false);
+        }
     }
 
     return (
@@ -138,6 +192,7 @@ If you want to reset then press stop to remove current route, then press go to s
                     // newWalkLocation && <Marker coordinate={newWalkLocation} />
                 }
 
+                {poly !== null && poly}
 
                 {/* Accuracy circle around users location */}
                 <Circle
@@ -160,20 +215,20 @@ If you want to reset then press stop to remove current route, then press go to s
                             paused ?
                                 //Currently paused, show continue button
                                 <View style={styles.fabConLeft}>
-                                    <TouchableHighlight style={styles.fab} onPress={() => setPaused(false)} underlayColor={Colours.primary.light} >
+                                    <TouchableHighlight style={styles.fab} onPress={() => handlePaused(false)} underlayColor={Colours.primary.light} >
                                         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Continue</Text>
                                     </TouchableHighlight>
                                 </View>
                                 :
                                 //Not paused, show pause button
                                 <View style={styles.fabConLeft}>
-                                    <TouchableHighlight style={styles.fab} onPress={() => setPaused(true)} underlayColor={Colours.primary.light} >
+                                    <TouchableHighlight style={styles.fab} onPress={() => handlePaused(true)} underlayColor={Colours.primary.light} >
                                         <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Pause</Text>
                                     </TouchableHighlight>
                                 </View>
                         }
                         <View style={styles.fabConRight}>
-                            <TouchableHighlight style={styles.fab} onPress={() => setRecording(false)} underlayColor={Colours.primary.light} >
+                            <TouchableHighlight style={styles.fab} onPress={() => handleRecording(false)} underlayColor={Colours.primary.light} >
                                 <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Stop</Text>
                             </TouchableHighlight>
                         </View>
@@ -181,14 +236,11 @@ If you want to reset then press stop to remove current route, then press go to s
                     :
                     //Not recording, just go button
                     <View style={styles.fabConRight}>
-                        <TouchableHighlight style={styles.fab} onPress={() => setRecording(true)} underlayColor={Colours.primary.light} >
+                        <TouchableHighlight style={styles.fab} onPress={() => handleRecording(true)} underlayColor={Colours.primary.light} >
                             <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Go</Text>
                         </TouchableHighlight>
                     </View>
             }
-
-
-
 
             <Modal animationType="fade" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
                 <View style={styles.centeredView}>
@@ -206,7 +258,7 @@ If you want to reset then press stop to remove current route, then press go to s
                                             <Text style={styles.modalText}>You must have some coordinates to create a route!</Text>
                                             :
                                             <>
-                                                <Text style={styles.modalText}>Enter a name for the walk and a description to tell people what kind of place this is.</Text>
+                                                <Text style={styles.modalText}>Enter a name for the route and a description to tell people what kind of place this is.</Text>
                                                 <TextInput
                                                     style={styles.input}
                                                     onChangeText={(text) => setRouteName(text)}
@@ -216,7 +268,7 @@ If you want to reset then press stop to remove current route, then press go to s
                                                 <TextInput
                                                     multiline
                                                     style={styles.input}
-                                                    onChangeText={(text) => setRoutekDesc(text)}
+                                                    onChangeText={(text) => setRouteDesc(text)}
                                                     value={routeDesc}
                                                     placeholder="Route Description"
                                                 />
@@ -229,7 +281,7 @@ If you want to reset then press stop to remove current route, then press go to s
                                             </TouchableHighlight>
                                             {
                                                 newRouteCoords &&
-                                                <TouchableHighlight style={[styles.button, styles.buttonConfirm]} onPress={() => handleNewWalk()} underlayColor={Colours.primary.light}>
+                                                <TouchableHighlight style={[styles.button, styles.buttonConfirm]} onPress={() => handleNewRoute()} underlayColor={Colours.primary.light}>
                                                     <Text style={styles.textStyle}>Confirm</Text>
                                                 </TouchableHighlight>
                                             }

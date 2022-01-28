@@ -3,7 +3,7 @@ import Toast from 'react-native-simple-toast';
 import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, Platform, PermissionsAndroid, useColorScheme, View, Linking, Switch } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getLocation } from '../../services/LocationServices';
+import { getLocation, checkPermissions } from '../../services/LocationServices';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 

@@ -39,7 +39,7 @@ const WalkDetails = ({ navigation, route }) => {
           text: "Cancel",
           style: "cancel"
         },
-        { text: "Confirm", onPress: () => navigation.navigate("New Route") }
+        { text: "Confirm", onPress: () => navigation.navigate("New Route", {walk: walk}) }
       ],
       {
         cancelable: true,

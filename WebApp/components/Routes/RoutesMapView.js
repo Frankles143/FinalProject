@@ -42,7 +42,6 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
     const mapRef = useRef(null);
 
     //Pass in current location and a series of coords
-
     useEffect(() => {
         setRoute(currentRoute);
 
