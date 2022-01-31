@@ -39,7 +39,7 @@ const WalkDetails = ({ navigation, route }) => {
           text: "Cancel",
           style: "cancel"
         },
-        { text: "Confirm", onPress: () => navigation.navigate("New Route", {walk: walk}) }
+        { text: "Confirm", onPress: () => navigation.navigate("New Route", {walk: route.params?.walk}) }
       ],
       {
         cancelable: true,
@@ -80,7 +80,7 @@ const WalkDetails = ({ navigation, route }) => {
         let routeOuts = [], hazards;
 
         routes.forEach((route, i) => {
-            if (route.routeHazards.length > 0) {
+            if (route.routeHazards?.length > 0) {
                 hazards = route.routeHazards.length;
             } else {
                 hazards = 0;

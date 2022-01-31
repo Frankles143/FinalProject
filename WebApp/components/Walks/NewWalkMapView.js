@@ -89,7 +89,7 @@ const NewWalkMapView = ({ navigation, location }) => {
     function goBackHandler() {
         setModalVisible(false);
         //Go back to walks page without a back button, the random number ensures that a refresh happens on return
-        navigation.navigate("Walks", {refresh: Math.random()});
+        navigation.navigate("Walks", { refresh: Math.random() });
     }
 
     return (
@@ -162,7 +162,13 @@ const NewWalkMapView = ({ navigation, location }) => {
                             :
                             <>
                                 {isComplete ?
-                                    <Text style={styles.modalHeader}>Successfully Added!</Text>
+                                    //Show this once done
+                                    <>
+                                        <Text style={styles.modalHeader}>Successfully Added!</Text>
+                                        <TouchableHighlight style={[styles.button, styles.buttonClose]} onPress={() => goBackHandler()} underlayColor={Colours.danger.light}>
+                                            <Text style={styles.textStyle}>Close and return</Text>
+                                        </TouchableHighlight>
+                                    </>
                                     :
                                     <>
                                         <Text style={styles.modalHeader}>Create new walk?</Text>

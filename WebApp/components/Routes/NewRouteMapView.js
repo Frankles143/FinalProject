@@ -5,6 +5,7 @@ import Toast from 'react-native-simple-toast';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Spacing, Typography, Colours } from '../../styles';
+import Calibrating from '../misc/Calibrating';
 import Loading from '../misc/Loading';
 // import WalkCallout from './WalkCallout';
 
@@ -28,7 +29,7 @@ const customMapStyle = [
     }
 ]
 
-const NewRouteMapView = ({ navigation, location, coords, walk, newClearMarkers, getLocationUpdates, stopLocationUpdates }) => {
+const NewRouteMapView = ({ navigation, location, coords, walk, calibrating, newClearMarkers, getLocationUpdates, stopLocationUpdates }) => {
     const [clearMarkers, setClearMarkers] = useState(null);
     const [recording, setRecording] = useState(false);
     const [paused, setPaused] = useState(false);
@@ -44,8 +45,8 @@ const NewRouteMapView = ({ navigation, location, coords, walk, newClearMarkers, 
 
     useEffect(() => {
         setModalVisible(false);
-        // newRouteTutorial();
-        console.log(walk);
+        // console.log(coords);
+        // console.log(walk);
         setPolyline();
 
         if (newClearMarkers > clearMarkers) {
@@ -53,7 +54,12 @@ const NewRouteMapView = ({ navigation, location, coords, walk, newClearMarkers, 
             setClearMarkers(newClearMarkers);
         }
 
-    }, [location]);
+    }, [location, calibrating]);
+
+    useEffect(() => {
+        //This appears every render
+        // newRouteTutorial();
+    }, []);
 
     const newRouteTutorial = () => {
         Alert.alert(
@@ -69,30 +75,59 @@ If you want to reset then press stop to remove current route, then press go to s
             setIsLoading(true);
 
             let newRoute = {
-
+                routeId: uuidv4(),
+                routeName: routeName,
+                routeDesc: routeDesc,
+                routeCoords: coords,
+                routeHazards: null
+                //userId
             };
 
-            // fetch('https://dogwalknationapi.azurewebsites.net/Route/newRoute', {
-            //     method: 'POST',
-            //     headers: {
-            //         Accept: 'application/json',
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify(
-            //         newRoute
-            //     )
-            // })
-            //     .then(response => response.json())
-            //     .then((data) => {
-            //         setIsLoading(false);
-            //         setIsComplete(true);
-            //         setTimeout(() => { goBackHandler(); }, 3000);
-            //     })
-            //     .catch((error) => console.error(error));
+            //Update walk with new route ID
+            let updatedWalk = walk;
+            let currentRoutes = walk.walkRoutes;
+            currentRoutes.push(newRoute.routeId);
 
-            setIsLoading(false);
-            setIsComplete(true);
-            setTimeout(() => { goBackHandler(); }, 3000);
+            updatedWalk = {
+                ...updatedWalk,
+                walkRoutes: currentRoutes
+            }
+
+            //also update walk object with new route attached
+
+            fetch('https://dogwalknationapi.azurewebsites.net/Route/newRoute', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(
+                    newRoute
+                )
+            })
+                .then(() => {
+                    fetch('https://dogwalknationapi.azurewebsites.net/Walk/updateWalk', {
+                        method: 'PUT',
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(
+                            updatedWalk
+                        )
+                    })
+                        .then(() => {
+                            setIsLoading(false);
+                            setIsComplete(true);
+                        })
+                        .catch((error) => console.error(error))
+
+                })
+                .catch((error) => console.error(error));
+
+            // console.log(newRoute);
+            // setIsLoading(false);
+            // setIsComplete(true);
         } else {
             Toast.show("Please enter a route name and description!")
         }
@@ -132,9 +167,13 @@ If you want to reset then press stop to remove current route, then press go to s
         setRecording(bool);
 
         if (bool === true) {
+            //Start recording
             getLocationUpdates();
         } else if (bool === false) {
-            stopLocationUpdates(true);
+            //Stop recording
+            setPaused(false);
+            stopLocationUpdates();
+            setModalVisible(true);
         }
     }
 
@@ -142,9 +181,11 @@ If you want to reset then press stop to remove current route, then press go to s
         setPaused(bool);
 
         if (bool === false) {
+            //Unpause
             getLocationUpdates();
         } else if (bool === false) {
-            stopLocationUpdates(false);
+            //Pause recording
+            stopLocationUpdates();
         }
     }
 
@@ -169,7 +210,6 @@ If you want to reset then press stop to remove current route, then press go to s
                 showsPointsOfInterest={false}
                 toolbarEnabled={false}
                 customMapStyle={customMapStyle}
-            // onPress={(e) => setNewWalkLocation(e.nativeEvent.coordinate)} 
             >
 
                 {/* Current location */}
@@ -186,11 +226,6 @@ If you want to reset then press stop to remove current route, then press go to s
                         <View style={styles.dot} />
                     </View>
                 </Marker>
-
-                {/* Anywhere you touch, create a marker there */}
-                {
-                    // newWalkLocation && <Marker coordinate={newWalkLocation} />
-                }
 
                 {poly !== null && poly}
 
@@ -250,13 +285,21 @@ If you want to reset then press stop to remove current route, then press go to s
                             :
                             <>
                                 {isComplete ?
-                                    <Text style={styles.modalHeader}>Successfully Added!</Text>
+                                    //Show this once finished
+                                    <>
+                                        <Text style={styles.modalHeader}>Successfully Added!</Text>
+                                        <TouchableHighlight style={[styles.button, styles.buttonClose]} onPress={() => goBackHandler()} underlayColor={Colours.danger.light}>
+                                            <Text style={styles.textStyle}>Close and return</Text>
+                                        </TouchableHighlight>
+                                    </>
                                     :
                                     <>
                                         <Text style={styles.modalHeader}>Create new route?</Text>
-                                        {!newRouteCoords ?
+                                        {coords == null || !coords?.length > 0 ?
+                                            //Show if null or empty array
                                             <Text style={styles.modalText}>You must have some coordinates to create a route!</Text>
                                             :
+                                            //Only show this secttion if there is sufficient data
                                             <>
                                                 <Text style={styles.modalText}>Enter a name for the route and a description to tell people what kind of place this is.</Text>
                                                 <TextInput
@@ -277,27 +320,24 @@ If you want to reset then press stop to remove current route, then press go to s
                                         <View style={styles.break}></View>
                                         <View style={styles.buttonGroup}>
                                             <TouchableHighlight style={[styles.button, styles.buttonClose]} onPress={() => setModalVisible(!modalVisible)} underlayColor={Colours.danger.light}>
-                                                <Text style={styles.textStyle}>Close</Text>
+                                                <Text style={styles.textStyle}>Cancel</Text>
                                             </TouchableHighlight>
                                             {
-                                                newRouteCoords &&
+                                                !coords == null || coords?.length > 0 &&
+                                                //Only show this button if there is sufficient data
                                                 <TouchableHighlight style={[styles.button, styles.buttonConfirm]} onPress={() => handleNewRoute()} underlayColor={Colours.primary.light}>
-                                                    <Text style={styles.textStyle}>Confirm</Text>
+                                                    <Text style={styles.textStyle}>Create</Text>
                                                 </TouchableHighlight>
                                             }
-
                                         </View>
                                     </>
-
                                 }
                             </>
-
                         }
                     </View>
-
                 </View>
             </Modal>
-
+            <Calibrating isCalibrating={calibrating} />
         </View>
     );
 

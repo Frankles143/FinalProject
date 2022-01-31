@@ -26,6 +26,7 @@ const NewRoute = ({ navigation, route }) => {
         getLocation().then((location) => {
             setLocation(location);
             setWalk(route.params?.walk);
+            // console.log(route.params?.walk);
             setIsLoading(false);
         })
     }, []);
@@ -103,28 +104,16 @@ const NewRoute = ({ navigation, route }) => {
         })
     }
 
+    //TODO: Add this as a return function in useEffect to make sure it stops getting updates if app crashes mid way etc. 
     //Stop the task to get updates
-    const stopLocationUpdates = async (isStop) => {
+    const stopLocationUpdates = async () => {
         let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
-        setIsCalibrating("");
+        setIsCalibrating(false);
 
         if (isRegistered) {
             setCalCount(0);
 
             Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_UPDATES_TASK);
-
-            //If stop then clean and pass through data else do nothing
-            if (isStop) {
-                if (coords.length > 0) {
-                    //send to API
-                    saveRoute(coords).then(() => {
-                        console.log("Saved and stopped");
-                    })
-                }
-            } else {
-                console.log("Paused");
-            }
-
         }
     }
 
@@ -172,7 +161,7 @@ const NewRoute = ({ navigation, route }) => {
                         contentInsetAdjustmentBehavior="automatic"
                         style={styles.container}>
                         <View style={styles.mapSection}>
-                            <NewRouteMapView location={location.coords || null} coords={coords || null} walk={walk} navigation={navigation} newClearMarker={clearMarkers} getLocationUpdates={getLocationUpdates} stopLocationUpdates={stopLocationUpdates} />
+                            <NewRouteMapView location={location.coords || null} coords={coords || null} walk={walk || null} navigation={navigation} newClearMarker={clearMarkers} calibrating={isCalibrating} getLocationUpdates={getLocationUpdates} stopLocationUpdates={stopLocationUpdates} />
                         </View>
                     </ScrollView>
                 </SafeAreaView>
