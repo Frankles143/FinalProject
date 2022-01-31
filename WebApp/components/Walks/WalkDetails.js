@@ -91,6 +91,7 @@ const WalkDetails = ({ navigation, route }) => {
                     <View>
                         <Text></Text>
                         <Text style={styles.body}>Route name: {route.routeName}</Text>
+                        <Text style={styles.body}>Route Description: {route.routeDesc}</Text>
                         <Text style={styles.body}>Number of hazards: {hazards}</Text>
                         <Text></Text>
                         <View style={styles.break}></View>

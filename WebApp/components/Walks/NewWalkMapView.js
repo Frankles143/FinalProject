@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity, Alert, Modal, Pressable, TextInput } from 'react-native';
 import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
+import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid';
 
 import { Spacing, Typography, Colours } from '../../styles';
