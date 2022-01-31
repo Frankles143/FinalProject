@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Toast from 'react-native-simple-toast';
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocation, checkPermissions } from '../../services/LocationServices';
 import * as Location from 'expo-location';
@@ -144,19 +143,12 @@ const NewRoute = ({ navigation, route }) => {
         setClearMarkers(clearMarkers + 1);
     }
 
-    const isDarkMode = useColorScheme() === 'dark';
-
-    const backgroundStyle = {
-        backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-    };
-
     return (
         isLoading ?
             <Loading />
             :
             <>
-                <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-                <SafeAreaView style={backgroundStyle}>
+                <SafeAreaView>
                     <ScrollView
                         contentInsetAdjustmentBehavior="automatic"
                         style={styles.container}>

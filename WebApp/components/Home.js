@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
-import { Node } from 'react';
-import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Button, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loading from './misc/Loading';
 
@@ -44,34 +42,6 @@ const styles = StyleSheet.create({
     },
 });
 
-
-const Section = ({ children, title }) => {
-    const isDarkMode = useColorScheme() === 'dark';
-    return (
-        <View style={styles.sectionContainer}>
-            <Text
-                style={[
-                    styles.sectionTitle,
-                    {
-                        color: isDarkMode ? Colors.white : Colors.black,
-                    },
-                ]}>
-                {title}
-            </Text>
-            <Text
-                style={[
-                    styles.sectionDescription,
-                    {
-                        color: isDarkMode ? Colors.light : Colors.dark,
-                    },
-                ]}>
-                {children}
-            </Text>
-        </View>
-    );
-};
-
-
 const Home = ({ navigation }) => {
     // debugger;
     const [isLoading, setIsLoading] = React.useState(true);
@@ -80,45 +50,39 @@ const Home = ({ navigation }) => {
     useEffect(() => {
         try {
             AsyncStorage.getItem("User")
-            .then((value) => {
-                if(value !== null) {
-                    var JsonValue = JSON.parse(value);
-                    setUser(JsonValue);
-                    // console.log(JsonValue);
-                    setIsLoading(false);
-                  }
-            })
-          } catch(e) {
+                .then((value) => {
+                    if (value !== null) {
+                        var JsonValue = JSON.parse(value);
+                        setUser(JsonValue);
+                        // console.log(JsonValue);
+                        setIsLoading(false);
+                    }
+                })
+        } catch (e) {
             // error reading value
             console.log(e);
-          }
-    }, [] );
-
-    const isDarkMode = useColorScheme() === 'dark';
-
-    const backgroundStyle = {
-        backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-    };
-
+        }
+    }, []);
 
     return (
         isLoading ?
-        <Loading />
-        :
-        <SafeAreaView style={backgroundStyle}>
-            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-            <ScrollView
-                contentInsetAdjustmentBehavior="automatic"
-                style={backgroundStyle}>
-                <View style={styles.mainView} >
-                    <Text style={styles.loginText}>Welcome home, {user.firstName} {user.lastName}</Text>
-                    <Text style={styles.loginText}>Your unique user ID is {user.userId}</Text>
-                    <Text style={styles.loginText}>Your username is: {user.username}</Text>
-                    <Text></Text>
-                    <Button title="Go to location test" onPress={() => navigation.navigate("Route")} />
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+            <Loading />
+            :
+            <>
+                <SafeAreaView>
+                    <ScrollView
+                        contentInsetAdjustmentBehavior="automatic"
+                        style={backgroundStyle}>
+                        <View style={styles.mainView} >
+                            <Text style={styles.loginText}>Welcome home, {user.firstName} {user.lastName}</Text>
+                            <Text style={styles.loginText}>Your unique user ID is {user.userId}</Text>
+                            <Text style={styles.loginText}>Your username is: {user.username}</Text>
+                            <Text></Text>
+                            <Button title="Go to location test" onPress={() => navigation.navigate("Route")} />
+                        </View>
+                    </ScrollView>
+                </SafeAreaView>
+            </>
     );
 };
 

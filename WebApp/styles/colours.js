@@ -1,6 +1,7 @@
 export const background = {
     light: "#FFFFFF",
     grey: "#F2F2F2",
+    dark: "#222222",
     black: "#000000",
 }
 

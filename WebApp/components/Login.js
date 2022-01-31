@@ -1,9 +1,7 @@
 import React from 'react';
-import { Node } from 'react';
-import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native';
+import { Button, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 import Loading from './misc/Loading';
 
 const styles = StyleSheet.create({
@@ -49,12 +47,6 @@ const Login = ({ navigation }) => {
     const [isLoading, setIsLoading] = React.useState(false);
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
-
-    const isDarkMode = useColorScheme() === 'dark';
-
-    const backgroundStyle = {
-        backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-    };
 
     const CheckLoginDetails = () => {
         if (email !== "" && password !== "") {
@@ -116,11 +108,8 @@ const Login = ({ navigation }) => {
         isLoading ? 
         <Loading /> 
         :
-        <SafeAreaView style={backgroundStyle}>
-            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-            <ScrollView
-                contentInsetAdjustmentBehavior="automatic"
-                style={backgroundStyle}>
+        <SafeAreaView>
+            <ScrollView contentInsetAdjustmentBehavior="automatic">
                 <View style={styles.mainView} >
                     <Text style={styles.loginText}>Please log in with your email and password to continue</Text>
                     <TextInput

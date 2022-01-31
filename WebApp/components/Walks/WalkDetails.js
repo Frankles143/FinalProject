@@ -1,8 +1,8 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, TouchableHighlight, Button, Alert } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, TouchableHighlight, Button, Alert} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Colours, Typography } from '../../styles';
-import { body } from '../../styles/typography';
 import Loading from '../misc/Loading';
 
 const WalkDetails = ({ navigation, route }) => {
@@ -23,28 +23,28 @@ const WalkDetails = ({ navigation, route }) => {
         navigation.setOptions({
             headerRight: () => (
                 <Button title="New Route"
-                color={Colours.primary.base} 
-                accessibilityLabel="This opens a dialog to confirm creation of a new route" 
-                onPress={() => confirmCreateRoute()} />
+                    color={Colours.primary.base}
+                    accessibilityLabel="This opens a dialog to confirm creation of a new route"
+                    onPress={() => confirmCreateRoute()} />
             ),
         });
     }, [navigation])
 
     const confirmCreateRoute = () =>
-    Alert.alert(
-      "Create new route?",
-      "Would you like to create a new route for this walk?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        { text: "Confirm", onPress: () => navigation.navigate("New Route", {walk: route.params?.walk}) }
-      ],
-      {
-        cancelable: true,
-      }
-    );
+        Alert.alert(
+            "Create new route?",
+            "Would you like to create a new route for this walk?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                { text: "Confirm", onPress: () => navigation.navigate("New Route", { walk: route.params?.walk }) }
+            ],
+            {
+                cancelable: true,
+            }
+        );
 
     const getRoutes = (walk) => {
         let routeIds = {
@@ -87,7 +87,7 @@ const WalkDetails = ({ navigation, route }) => {
             }
 
             var tempRouteOut =
-                <TouchableHighlight key={i} onPress={() => navigation.navigate("Routes", {currentRoute: route})} underlayColor="white">
+                <TouchableHighlight key={i} onPress={() => navigation.navigate("Routes", { currentRoute: route })} underlayColor="white">
                     <View>
                         <Text></Text>
                         <Text style={styles.body}>Route name: {route.routeName}</Text>
@@ -109,26 +109,28 @@ const WalkDetails = ({ navigation, route }) => {
         isLoading ?
             <Loading />
             :
-            <View style={styles.container}>
-                <View style={styles.mainView}>
-                    <View style={styles.routeView}>
-                        <Text style={styles.header}>{walk.walkName}</Text>
-                        <ScrollView contentInsetAdjustmentBehavior='automatic'>
-                            <Text style={styles.body}>{walk.walkDesc}</Text>
-                            <Text style={styles.body}>Tap on a route to view it!</Text>
-                            <View style={styles.break}></View>
-                            {!routeOutput ? <Text style={[styles.header, styles.noRoutes]}>No routes!</Text> : routeOutput}
-                        </ScrollView>
-                    </View>
-                </View>
+            <>
+                <SafeAreaView style={styles.container}>
+                        <View style={styles.mainView}>
+                            <View style={styles.routeView}>
+                                <Text style={styles.header}>{walk.walkName}</Text>
+                                <ScrollView contentInsetAdjustmentBehavior='automatic'>
+                                    <Text style={styles.body}>{walk.walkDesc}</Text>
+                                    <Text style={styles.body}>Tap on a route to view it!</Text>
+                                    <View style={styles.break}></View>
+                                    {!routeOutput ? <Text style={[styles.header, styles.noRoutes]}>No routes!</Text> : routeOutput}
+                                </ScrollView>
+                            </View>
+                        </View>
 
-                <View style={styles.commentView}>
-                    <Text style={styles.header}>Comments</Text>
-                    <ScrollView contentInsetAdjustmentBehavior='automatic'>
-                            
-                        </ScrollView>
-                </View>
-            </View>
+                        <View style={styles.commentView}>
+                            <Text style={styles.header}>Comments</Text>
+                            <ScrollView contentInsetAdjustmentBehavior='automatic'>
+
+                            </ScrollView>
+                        </View>
+                </SafeAreaView>
+            </>
     )
 };
 
@@ -166,5 +168,6 @@ const styles = StyleSheet.create({
         marginTop: 100,
     }
 });
+
 
 export default WalkDetails;

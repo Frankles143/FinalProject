@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import Toast from 'react-native-simple-toast';
-import { Button, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, Platform, PermissionsAndroid, useColorScheme, View, Linking, Switch } from 'react-native';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Button, SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocation, checkPermissions } from '../../services/LocationServices';
 import * as Location from 'expo-location';
@@ -176,20 +175,12 @@ const Routes = ({ navigation, route }) => {
     //         });
     // }
 
-    const isDarkMode = useColorScheme() === 'dark';
-
-    const backgroundStyle = {
-        backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-    };
-
-
     return (
         isLoading ?
             <Loading />
             :
             <>
-                <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-                <SafeAreaView style={backgroundStyle}>
+                <SafeAreaView>
                     <ScrollView
                         contentInsetAdjustmentBehavior="automatic"
                         style={styles.container}>
