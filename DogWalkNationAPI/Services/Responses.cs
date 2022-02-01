@@ -38,5 +38,11 @@ namespace DogWalkNationAPI.Services
             [JsonProperty]
             public List<Route> Routes { get; set; }
         }
+
+        public class DefaultWithComments : Default
+        {
+            [JsonProperty]
+            public List<Comment> Comments { get; set; }
+        }
     }
 }
