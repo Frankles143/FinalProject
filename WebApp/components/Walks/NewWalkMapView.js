@@ -75,7 +75,7 @@ const NewWalkMapView = ({ navigation, location }) => {
                 .then((data) => {
                     setIsLoading(false);
                     setIsComplete(true);
-                    setTimeout(() => { goBackHandler(); }, 3000);
+                    // setTimeout(() => { goBackHandler(); }, 3000);
                 })
                 .catch((error) => console.error(error));
 
@@ -204,22 +204,17 @@ const NewWalkMapView = ({ navigation, location }) => {
                                                     <Text style={styles.textStyle}>Confirm</Text>
                                                 </TouchableHighlight>
                                             }
-
                                         </View>
                                     </>
-
                                 }
                             </>
-
                         }
                     </View>
 
                 </View>
             </Modal>
-
         </View>
     );
-
 };
 
 const styles = StyleSheet.create({
