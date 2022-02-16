@@ -60,7 +60,8 @@ const Comments = ({ navigation, walk }) => {
         // console.log(comments)
         comments.forEach((comment, i) => {
             let date = new Date(Date.parse(comment.timestamp));
-            let timestamp = `${date.getUTCHours()}:${date.getUTCMinutes()}  ${date.getUTCDay()}/${date.getUTCMonth()}/${date.getUTCFullYear()}`
+            // console.log(date);
+            let timestamp = `${date.getUTCHours()}:${date.getUTCMinutes()}  ${date.getUTCDate()}/${date.getUTCMonth() + 1}/${date.getUTCFullYear()}`
             let temp;
             //This will be check user Id against current user
             if (isUser) {
