@@ -75,5 +75,22 @@ namespace DogWalkNationAPI.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("/[controller]/replaceWalk")]
+        public async Task<Responses.Default> ReplaceeWalk(Walk walk)
+        {
+            try
+            {
+                await _walkHelper.Replace(walk.WalkId.ToString(), walk);
+
+                return new Responses.Default() { Success = true, Message = "Walk updated!" };
+            }
+            catch (Exception)
+            {
+                return new Responses.Default() { Success = false, Message = "An error has occurred" };
+                throw;
+            }
+        }
+
     }
 }

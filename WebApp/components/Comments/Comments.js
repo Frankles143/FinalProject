@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Button, Modal, TextInput, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Button, Modal, TextInput, TouchableHighlight, TouchableOpacity, Alert } from 'react-native';
 import Toast from 'react-native-simple-toast';
 import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid';
@@ -10,7 +10,7 @@ import { Colours, Typography } from '../../styles';
 const Comments = ({ navigation, walk }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isComplete, setIsComplete] = useState(false);
-    const [comments, setComments] = useState(null);
+    const [isUser, setIsUser] = useState(true);
     const [commentsFormatted, setCommentsFormatted] = useState(null);
     const [commentBody, setCommentBody] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
@@ -19,7 +19,7 @@ const Comments = ({ navigation, walk }) => {
     useEffect(() => {
         //get comments first
         // console.log(walk);
-        if (walk.walkComments !== null) {
+        if (walk.commentIds !== null) {
             fetchComments(walk);
         } else {
             setIsLoading(false);
@@ -31,8 +31,8 @@ const Comments = ({ navigation, walk }) => {
             ids: []
         };
 
-        if (walk?.walkComments?.length > 0) {
-            commentIds.ids = walk.walkComments;
+        if (walk?.commentIds?.length > 0) {
+            commentIds.ids = walk.commentIds;
 
             fetch('https://dogwalknationapi.azurewebsites.net/Comment/getComments', {
                 method: 'POST',
@@ -57,26 +57,124 @@ const Comments = ({ navigation, walk }) => {
 
     const handleComments = (comments) => {
         let tempComments = [];
-
+        // console.log(comments)
         comments.forEach((comment, i) => {
             let date = new Date(Date.parse(comment.timestamp));
             let timestamp = `${date.getUTCHours()}:${date.getUTCMinutes()}  ${date.getUTCDay()}/${date.getUTCMonth()}/${date.getUTCFullYear()}`
-            let temp =
-                <View style={styles.comment} key={i}>
-                    <Text></Text>
-                    <Text style={styles.username}>{comment.username}</Text>
-                    <Text style={styles.body}>{comment.commentBody}</Text>
-                    <Text style={styles.timestamp}>{timestamp}</Text>
-                    <View style={styles.break}></View>
-                </View>;
+            let temp;
+            //This will be check user Id against current user
+            if (isUser) {
+                temp =
+                    <View style={styles.comment} key={i}>
+                        <TouchableOpacity style={styles.deleteComment} onPress={() => confirmDeleteComment(comment.id)}><Text style={styles.deleteCommentText}>X</Text></TouchableOpacity>
+                        <Text></Text>
+                        <Text style={styles.username}>{comment.username}</Text>
+                        <Text style={styles.body}>{comment.commentBody}</Text>
+                        <Text style={styles.timestamp}>{timestamp}</Text>
+                        <View style={styles.break}></View>
+                    </View>;
+            } else {
+                temp =
+                    <View style={styles.comment} key={i}>
+                        <Text></Text>
+                        <Text style={styles.username}>{comment.username}</Text>
+                        <Text style={styles.body}>{comment.commentBody}</Text>
+                        <Text style={styles.timestamp}>{timestamp}</Text>
+                        <View style={styles.break}></View>
+                    </View>;
+            }
+
 
             tempComments.push(temp);
         });
+        //Chronological order bottom to top
         tempComments.reverse();
 
         setCommentsFormatted(tempComments);
-        setComments(comments);
+        // setComments(comments);
         setIsLoading(false);
+    }
+
+    const confirmDeleteComment = (commentId) => {
+        Alert.alert(
+            "Delete your comment?",
+            "Would you like to delete this comment?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                { text: "Confirm", onPress: () => handleDeleteComment(commentId) }
+            ],
+            {
+                cancelable: true,
+            }
+        );
+    }
+
+    const handleDeleteComment = (commentId) => {
+        console.log(commentId);
+        setIsLoading(true);
+
+        // After confirmation dialog then delete from db
+        fetch(`https://dogwalknationapi.azurewebsites.net/Comment/deleteComment?commentId=${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then((data) => {
+                console.log(data);
+                if (data.success === true) {
+                    updateWalkRemoveComment(commentId)
+                } else {
+                    Toast.show("Could not delete comment")
+                    setIsLoading(false);
+                    setIsComplete(true);
+                }
+            })
+            .catch((error) => {
+                console.error(error)
+                setIsLoading(false);
+            });
+
+    }
+
+    const updateWalkRemoveComment = (commentId) => {
+        //Update walk with new route ID
+        // console.log(walk);
+        let updatedWalk = walk;
+        let currentComments = walk.commentIds;
+
+        if (currentComments.length === 1) {
+            currentComments = null;
+        } else {
+            currentComments = currentComments.filter((comment) => { return comment !== commentId })
+        }
+
+        updatedWalk = {
+            ...updatedWalk,
+            commentIds: currentComments
+        }
+
+        fetch('https://dogwalknationapi.azurewebsites.net/Walk/updateWalk', {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                updatedWalk
+            )
+        })
+            .then(() => {
+                setIsComplete(true);
+                setModalVisible(true);
+                setIsLoading(false);
+            })
+            .catch((error) => console.error(error))
     }
 
     const createNewComment = () => {
@@ -96,8 +194,6 @@ const Comments = ({ navigation, walk }) => {
                 commentBody: commentBody
             }
 
-            // console.log(newComment);
-
             //send comment to db
             fetch('https://dogwalknationapi.azurewebsites.net/Comment/newComment', {
                 method: 'POST',
@@ -112,21 +208,21 @@ const Comments = ({ navigation, walk }) => {
                 .then(response => response.json())
                 .then((data) => {
                     //update walk with new comment id
-                    updateWalk(newComment);
+                    updateWalkNewComment(newComment);
                 })
                 .catch((error) => console.error(error));
 
-            //Update comments somehow?
+            //Update comments somehow? - currently just goes back home
         } else {
             Toast.show("Please enter a comment!")
         }
     }
 
-    const updateWalk = (newComment) => {
+    const updateWalkNewComment = (newComment) => {
         //Update walk with new route ID
         // console.log(walk);
         let updatedWalk = walk;
-        let currentComments = walk.walkComments;
+        let currentComments = walk.commentIds;
 
         if (currentComments === null) {
             currentComments = [newComment.commentId];
@@ -150,8 +246,8 @@ const Comments = ({ navigation, walk }) => {
             )
         })
             .then(() => {
-                setIsLoading(false);
                 setIsComplete(true);
+                setIsLoading(false);
             })
             .catch((error) => console.error(error))
     }
@@ -189,7 +285,7 @@ const Comments = ({ navigation, walk }) => {
                                     {isComplete ?
                                         //Show this once finished
                                         <>
-                                            <Text style={styles.modalHeader}>Successfully Added!</Text>
+                                            <Text style={styles.modalHeader}>Successful!</Text>
                                             <TouchableHighlight style={[styles.button, styles.buttonClose]} onPress={() => goBackHandler()} underlayColor={Colours.danger.light}>
                                                 <Text style={styles.textStyle}>Close and return</Text>
                                             </TouchableHighlight>
@@ -232,6 +328,19 @@ const Comments = ({ navigation, walk }) => {
 
 const styles = StyleSheet.create({
     comment: {
+        flex: 1
+    },
+    deleteComment: {
+        zIndex: 999,
+        position: "absolute",
+        right: 15,
+        top: 15,
+        height: 25,
+        width: 25,
+    },
+    deleteCommentText: {
+        textAlign: "center",
+        ...Typography.header.medium,
     },
     headerGroup: {
         flexDirection: "row",

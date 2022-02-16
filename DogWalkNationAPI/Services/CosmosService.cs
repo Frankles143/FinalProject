@@ -98,5 +98,18 @@ namespace DogWalkNationAPI.Services
         {
             await _container.UpsertItemAsync(item, new PartitionKey(key));
         }
+
+        /// <summary>
+        /// Replaces an item
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public async Task Replace(string key, T item)
+        {
+            await _container.ReplaceItemAsync(item, key, new PartitionKey(key));
+
+
+        }
     }
 }

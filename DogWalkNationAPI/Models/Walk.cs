@@ -30,7 +30,7 @@ namespace DogWalkNationAPI.Models
         public List<Guid> WalkRoutes { get; set; }
         [JsonProperty(PropertyName = "walkFlags")]
         public List<Flags> Flags { get; set; }
-        [JsonProperty(PropertyName = "walkComments")]
+        [JsonProperty(PropertyName = "commentIds")]
         public List<Guid> CommentIds { get; set; }
     }
 

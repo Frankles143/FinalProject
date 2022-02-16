@@ -13,5 +13,6 @@ namespace DogWalkNationAPI.Services
         Task<T> Get(Guid id, string key);
         Task<IEnumerable<T>> GetMultiple(QueryDefinition query);
         Task Update(string key, T item);
+        Task Replace(string key, T item);
     }
 }
