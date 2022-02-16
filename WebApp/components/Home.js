@@ -3,6 +3,49 @@ import { Button, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loading from './misc/Loading';
 
+const Home = ({ navigation }) => {
+    // debugger;
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [user, setUser] = React.useState();
+
+    useEffect(() => {
+        try {
+            AsyncStorage.getItem("User")
+                .then((value) => {
+                    if (value !== null) {
+                        var JsonValue = JSON.parse(value);
+                        setUser(JsonValue);
+                        // console.log(JsonValue);
+                        setIsLoading(false);
+                    }
+                })
+        } catch (e) {
+            // error reading value
+            console.log(e);
+        }
+    }, []);
+
+    return (
+        isLoading ?
+            <Loading />
+            :
+            <>
+                <SafeAreaView>
+                    <ScrollView
+                        contentInsetAdjustmentBehavior="automatic">
+                        <View style={styles.mainView} >
+                            <Text style={styles.loginText}>Welcome home, {user.firstName} {user.lastName}</Text>
+                            <Text style={styles.loginText}>Your unique user ID is {user.id}</Text>
+                            <Text style={styles.loginText}>Your username is: {user.username}</Text>
+                            <Text></Text>
+                            <Button title="Go to location test" onPress={() => navigation.navigate("Walks")} />
+                        </View>
+                    </ScrollView>
+                </SafeAreaView>
+            </>
+    );
+};
+
 const styles = StyleSheet.create({
     sectionContainer: {
         marginTop: 32,
@@ -41,50 +84,5 @@ const styles = StyleSheet.create({
         marginTop: 15,
     },
 });
-
-const Home = ({ navigation }) => {
-    // debugger;
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [user, setUser] = React.useState();
-
-    useEffect(() => {
-        try {
-            AsyncStorage.getItem("User")
-                .then((value) => {
-                    if (value !== null) {
-                        var JsonValue = JSON.parse(value);
-                        setUser(JsonValue);
-                        // console.log(JsonValue);
-                        setIsLoading(false);
-                    }
-                })
-        } catch (e) {
-            // error reading value
-            console.log(e);
-        }
-    }, []);
-
-    return (
-        isLoading ?
-            <Loading />
-            :
-            <>
-                <SafeAreaView>
-                    <ScrollView
-                        contentInsetAdjustmentBehavior="automatic"
-                        style={backgroundStyle}>
-                        <View style={styles.mainView} >
-                            <Text style={styles.loginText}>Welcome home, {user.firstName} {user.lastName}</Text>
-                            <Text style={styles.loginText}>Your unique user ID is {user.userId}</Text>
-                            <Text style={styles.loginText}>Your username is: {user.username}</Text>
-                            <Text></Text>
-                            <Button title="Go to location test" onPress={() => navigation.navigate("Route")} />
-                        </View>
-                    </ScrollView>
-                </SafeAreaView>
-            </>
-    );
-};
-
 
 export default Home;
