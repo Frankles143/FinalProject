@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { retrieveUser } from '../services/StorageServices';
+import { Colours, Typography } from '../styles';
 import Loading from './misc/Loading';
 
 const Home = ({ navigation }) => {
@@ -20,58 +21,64 @@ const Home = ({ navigation }) => {
             <Loading />
             :
             <>
-                <SafeAreaView>
-                    <ScrollView
-                        contentInsetAdjustmentBehavior="automatic">
-                        <View style={styles.mainView} >
-                            <Text style={styles.loginText}>Welcome home, {user.firstName} {user.lastName}</Text>
-                            <Text style={styles.loginText}>Your unique user ID is {user.id}</Text>
-                            <Text style={styles.loginText}>Your username is: {user.username}</Text>
+                <SafeAreaView style={styles.container}>
+                    <View style={styles.mainView} >
+                        <View style={styles.welcomeSection}>
+                            <Text style={styles.loginText}>Welcome back, {user.firstName} {user.lastName}!</Text>
                             <Text></Text>
-                            <Button title="Go to location test" onPress={() => navigation.navigate("Walks")} />
+                            <View style={styles.buttonContainer}>
+                                <Button style={styles.walkButton} title="Find walks" onPress={() => navigation.navigate("Walks")} color={Colours.primary.base} />
+                            </View>
                         </View>
-                    </ScrollView>
+
+                        <View style={styles.createdSection}>
+                            <ScrollView contentInsetAdjustmentBehavior="automatic">
+                                <Text style={styles.header}>Created Routes</Text>
+                                
+                            </ScrollView>
+                        </View>
+                    </View>
                 </SafeAreaView>
             </>
     );
 };
 
 const styles = StyleSheet.create({
-    sectionContainer: {
-        marginTop: 32,
-        paddingHorizontal: 24,
-    },
-    sectionTitle: {
-        fontSize: 24,
-        fontWeight: '600',
-    },
-    sectionDescription: {
-        marginTop: 8,
-        fontSize: 18,
-        fontWeight: '400',
-    },
-    highlight: {
-        fontWeight: '700',
+    container: {
+        flex: 1,
     },
     mainView: {
+        flex: 1,
         justifyContent: 'center',
-        alignItems: "center"
+        alignItems: "center",
+    },
+    welcomeSection: {
+        justifyContent: "center",
+        alignItems: "center",
+        flex: 0.2,
+        width: "100%",
+        borderBottomWidth: 2,
     },
     loginText: {
-        textAlign: "center",
         marginTop: 15,
-        fontSize: 15,
+        ...Typography.header.large,
     },
-    input: {
-        width: '60%',
-        marginTop: 20,
-        borderStyle: "solid",
-        borderColor: "black",
-        borderWidth: 2
-    },
-    submit: {
+    buttonContainer: {
+        alignItems: "center",
         width: "40%",
-        marginTop: 15,
+    },
+    walkButton: {
+        width: "40%",
+    },
+    createdSection: {
+        flex: 0.8,
+        width: "100%",
+        alignItems: "center",
+    },
+    header: {
+        marginTop: 10,
+        ...Typography.header.large,
+        alignItems: "center",
     },
 });
 

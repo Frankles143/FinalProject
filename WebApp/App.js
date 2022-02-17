@@ -18,7 +18,7 @@ const App = () => {
         <NavigationContainer>
             <Stack.Navigator> 
                 <Stack.Screen name="Login" component={Login} options={{headerShown: false}} />
-                <Stack.Screen name="Home" component={Home} options={{title: "Overview"}} />
+                <Stack.Screen name="Home" component={Home} options={{title: "Home"}} />
                 <Stack.Screen name="Walks" component={Walks} />
                 <Stack.Screen name="New Walk" component={NewWalk} />
                 <Stack.Screen name="Walk Details" component={WalkDetails} options={({navigation, route}) => ({title: route.params.name})}/>
