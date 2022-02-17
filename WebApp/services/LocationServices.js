@@ -1,8 +1,8 @@
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
- 
- //Function to quickly check permissions for foreground and background tasks
- export const checkPermissions = async () => {
+
+//Function to quickly check permissions for foreground and background tasks
+export const checkPermissions = async () => {
     let foreStatus = await Location.requestForegroundPermissionsAsync();
     let backStatus = await Location.requestBackgroundPermissionsAsync();
 

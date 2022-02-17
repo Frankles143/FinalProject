@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Button, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { retrieveUser } from '../services/StorageServices';
 import Loading from './misc/Loading';
 
 const Home = ({ navigation }) => {
@@ -9,20 +9,10 @@ const Home = ({ navigation }) => {
     const [user, setUser] = React.useState();
 
     useEffect(() => {
-        try {
-            AsyncStorage.getItem("User")
-                .then((value) => {
-                    if (value !== null) {
-                        var JsonValue = JSON.parse(value);
-                        setUser(JsonValue);
-                        // console.log(JsonValue);
-                        setIsLoading(false);
-                    }
-                })
-        } catch (e) {
-            // error reading value
-            console.log(e);
-        }
+        retrieveUser().then((user) => {
+            setUser(user);
+            setIsLoading(false);
+        })
     }, []);
 
     return (
