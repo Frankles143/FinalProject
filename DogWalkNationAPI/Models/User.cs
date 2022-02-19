@@ -11,16 +11,16 @@ namespace DogWalkNationAPI.Models
     {
         public User() { }
 
-        public User(string username, string email, string firstName, string lastName, byte[] salt, string hashedPassword)
+        public User(Guid userId, string username, string email, string firstName, string lastName, byte[] salt, string hashedPassword)
         {
-            UserId = Guid.NewGuid();
+            UserId = userId;
             Username = username;
             Email = email;
             FirstName = firstName;
             LastName = lastName;
             Salt = salt;
             HashedPassword = hashedPassword;
-            CreatedWalks = new List<string>();
+            CreatedRoutes = new List<string>();
             FavouriteWalks = new List<string>();
             DateRegistered = DateTime.UtcNow;
             
@@ -42,8 +42,8 @@ namespace DogWalkNationAPI.Models
         public byte[] Salt { get; set; }
         [JsonProperty(PropertyName = "hashedPassword")]
         public string HashedPassword { get; set; }
-        [JsonProperty(PropertyName = "createdWalks")]
-        public List<string> CreatedWalks { get; set; }
+        [JsonProperty(PropertyName = "createdRoutes")]
+        public List<string> CreatedRoutes { get; set; }
         [JsonProperty(PropertyName = "favouriteWalks")]
         public List<string> FavouriteWalks { get; set; }
         [JsonProperty(PropertyName = "dateRegistered")]

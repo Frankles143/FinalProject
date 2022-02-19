@@ -81,7 +81,6 @@ If you want to reset then press stop to remove current route, then press go to s
                 routeDesc: routeDesc,
                 routeCoords: coords,
                 routeHazards: null
-                //userId
             };
 
             //Update walk with new route ID
@@ -100,7 +99,6 @@ If you want to reset then press stop to remove current route, then press go to s
             }
 
             //also update walk object with new route attached
-
             fetch('https://dogwalknationapi.azurewebsites.net/Route/newRoute', {
                 method: 'POST',
                 headers: {

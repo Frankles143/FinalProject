@@ -49,6 +49,23 @@ namespace DogWalkNationAPI.Controllers
             return Ok(await _userHelper.Get(id, key));
         }
 
+        [TokenAuthorize]
+        [HttpPut]
+        [Route("/[controller]/updateUser")]
+        public async Task<Responses.Default> UpdateUser(Models.User user)
+        {
+            try
+            {
+                await _userHelper.Update(user.Username, user);
+                return new Responses.Default() { Success = true, Message = "User updated successfully" };
+            }
+            catch (Exception)
+            {
+                return new Responses.Default() { Success = false, Message = "An error has occurred" };
+                throw;
+            }
+        }
+
         [AllowAnonymous]
         [HttpPost]
         [Route("/[controller]/register")]
@@ -102,11 +119,14 @@ namespace DogWalkNationAPI.Controllers
                 iterationCount: 100000,
                 numBytesRequested: 256 / 8));
 
+            //Create userId
+            Guid userId = Guid.NewGuid();
+
             //Create User object
-            Models.User fullUser = new(newUser.Username, newUser.Email, newUser.FirstName, newUser.LastName, salt, hashed);
+            Models.User fullUser = new(userId, newUser.Username, newUser.Email, newUser.FirstName, newUser.LastName, salt, hashed);
 
             // Add New User to DB
-            await _userHelper.Update(fullUser.Username, fullUser);
+            await _userHelper.Update(newUser.Username, fullUser);
 
             return new Responses.Default() { Success = true, Message = "User created" };
         }
