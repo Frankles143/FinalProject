@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Button, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -78,6 +78,8 @@ const Login = ({ navigation }) => {
         }
     }
 
+    const refInputPassword = useRef();
+
     return (
         isLoading ?
             <Loading />
@@ -86,7 +88,7 @@ const Login = ({ navigation }) => {
                 <ScrollView keyboardShouldPersistTaps="always" contentInsetAdjustmentBehavior="automatic">
                     <View style={styles.mainView} >
                         <View style={styles.logoSection}>
-                            <Image style={styles.logo} source={Logo}/>
+                            <Image style={styles.logo} source={Logo} />
                         </View>
                         <View style={styles.inputSection}>
                             <Text style={styles.loginText}>Please log in with your email and password to continue</Text>
@@ -94,17 +96,22 @@ const Login = ({ navigation }) => {
                                 value={email}
                                 style={styles.input}
                                 onChangeText={setEmail}
+                                returnKeyType="next"
+                                onSubmitEditing={() => refInputPassword.current.focus()}
+                                blurOnSubmit={false}
                                 placeholder="Email Address"
                             />
                             <TextInput
                                 style={styles.input}
                                 onChangeText={setPassword}
+                                ref={refInputPassword}
+                                onSubmitEditing={CheckLoginDetails}
                                 placeholder="Password"
                                 secureTextEntry={true}
                             />
                             <View styles={styles.submit}>
                                 <Text></Text>
-                                <Button title="Login" onPress={CheckLoginDetails} color={Colours.primary.base}/>
+                                <Button title="Login" onPress={CheckLoginDetails} color={Colours.primary.base} />
                             </View>
                         </View>
 
