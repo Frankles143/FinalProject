@@ -5,11 +5,13 @@ import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid';
 
 import Loading from '../misc/Loading';
+import { retrieveUser } from '../../services/StorageServices';
 import { Colours, Typography } from '../../styles';
 
 const Comments = ({ navigation, walk }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isComplete, setIsComplete] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
     const [isUser, setIsUser] = useState(true);
     const [commentsFormatted, setCommentsFormatted] = useState(null);
     const [commentBody, setCommentBody] = useState("");
@@ -19,14 +21,18 @@ const Comments = ({ navigation, walk }) => {
     useEffect(() => {
         //get comments first
         // console.log(walk);
-        if (walk.commentIds !== null) {
-            fetchComments(walk);
-        } else {
-            setIsLoading(false);
-        }
+        retrieveUser().then((userData) => {
+            setCurrentUser(userData);
+            if (walk.commentIds !== null) {
+                fetchComments(walk, userData);
+            } else {
+                setIsLoading(false);
+            }
+        })
+        
     }, [walk]);
 
-    const fetchComments = (walk) => {
+    const fetchComments = (walk, user) => {
         let commentIds = {
             ids: []
         };
@@ -46,7 +52,7 @@ const Comments = ({ navigation, walk }) => {
             })
                 .then(response => response.json())
                 .then((data) => {
-                    handleComments(data.comments)
+                    handleComments(data.comments, user)
                 })
                 .catch((error) => console.error(error));
         }
@@ -55,7 +61,7 @@ const Comments = ({ navigation, walk }) => {
         }
     }
 
-    const handleComments = (comments) => {
+    const handleComments = (comments, user) => {
         let tempComments = [];
         // console.log(comments)
         comments.forEach((comment, i) => {
@@ -63,8 +69,9 @@ const Comments = ({ navigation, walk }) => {
             // console.log(date);
             let timestamp = `${date.getUTCHours()}:${date.getUTCMinutes()}  ${date.getUTCDate()}/${date.getUTCMonth() + 1}/${date.getUTCFullYear()}`
             let temp;
-            //This will be check user Id against current user
-            if (isUser) {
+
+            //If the comment creator matches the current user then allow them to delete the comment
+            if (comment.userId === user.id) {
                 temp =
                     <View style={styles.comment} key={i}>
                         <TouchableOpacity style={styles.deleteComment} onPress={() => confirmDeleteComment(comment.id)}><Text style={styles.deleteCommentText}>X</Text></TouchableOpacity>
@@ -189,6 +196,7 @@ const Comments = ({ navigation, walk }) => {
 
             let newComment = {
                 commentId: uuidv4(),
+                //userId and username to change
                 userId: "c1b513c0-6188-4790-b9f0-f59b7a111720",
                 username: "Frankles",
                 timestamp: dateIso,

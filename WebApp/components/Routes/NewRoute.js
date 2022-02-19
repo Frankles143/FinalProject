@@ -116,28 +116,6 @@ const NewRoute = ({ navigation, route }) => {
         }
     }
 
-    const saveRoute = async (coords) => {
-        //This won't work now, needs to send a full Route object
-        // fetch('https://dogwalknationapi.azurewebsites.net/route/newroute', {
-        //     method: 'POST',
-        //     headers: {
-        //         Accept: 'application/json',
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify(
-        //         coords
-        //     )
-        // })
-        //     .then(response => { response.json() })
-        //     .then(json => {
-        //         console.log(json);
-        //         handleClearMarkers();
-        //         setCoords([]);
-        //     })
-
-        console.log(coords);
-    }
-
     const handleClearMarkers = async () => {
         setCoords([]);
         setClearMarkers(clearMarkers + 1);
