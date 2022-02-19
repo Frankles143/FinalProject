@@ -197,8 +197,8 @@ const Comments = ({ navigation, walk }) => {
             let newComment = {
                 commentId: uuidv4(),
                 //userId and username to change
-                userId: "c1b513c0-6188-4790-b9f0-f59b7a111720",
-                username: "Frankles",
+                userId: currentUser.id,
+                username: currentUser.username,
                 timestamp: dateIso,
                 commentBody: commentBody
             }
@@ -318,7 +318,7 @@ const Comments = ({ navigation, walk }) => {
                                                     <Text style={styles.textStyle}>Cancel</Text>
                                                 </TouchableHighlight>
                                                 <TouchableHighlight style={[styles.button, styles.buttonConfirm]} onPress={() => createNewComment()} underlayColor={Colours.primary.light}>
-                                                    <Text style={styles.textStyle}> Post </Text>
+                                                    <Text style={styles.textStyle}>Post</Text>
                                                 </TouchableHighlight>
                                             </View>
                                         </>
