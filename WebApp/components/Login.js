@@ -44,6 +44,8 @@ const Login = ({ navigation }) => {
                             try {
                                 const userString = JSON.stringify(json.user);
                                 const tokenString = JSON.stringify(json.token);
+
+                                //Store user and token items for use later on
                                 AsyncStorage.setItem('User', userString)
                                     .then(() => {
                                         AsyncStorage.setItem('Token', tokenString).then(() => {

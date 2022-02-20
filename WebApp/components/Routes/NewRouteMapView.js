@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Spacing, Typography, Colours } from '../../styles';
 import Calibrating from '../misc/Calibrating';
 import Loading from '../misc/Loading';
+import { retrieveToken, retrieveUser } from '../../services/StorageServices';
 // import WalkCallout from './WalkCallout';
 
 const customMapStyle = [
@@ -83,22 +84,7 @@ If you want to reset then press stop to remove current route, then press go to s
                 routeHazards: null
             };
 
-            //Update walk with new route ID
-            let updatedWalk = walk;
-            let currentRoutes = walk.walkRoutes;
-            
-            if (currentRoutes === null) {
-                currentRoutes = [newRoute.routeId];
-            } else {
-                currentRoutes.push(newRoute.routeId);
-            }
-
-            updatedWalk = {
-                ...updatedWalk,
-                walkRoutes: currentRoutes
-            };
-
-            //also update walk object with new route attached, and user with created route
+            //Send new route to the database
             fetch('https://dogwalknationapi.azurewebsites.net/Route/newRoute', {
                 method: 'POST',
                 headers: {
@@ -110,38 +96,95 @@ If you want to reset then press stop to remove current route, then press go to s
                 )
             })
                 .then(() => {
-                    fetch('https://dogwalknationapi.azurewebsites.net/Walk/updateWalk', {
-                        method: 'PUT',
-                        headers: {
-                            Accept: 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(
-                            updatedWalk
-                        )
-                    })
-                        .then(() => {
-                            setIsLoading(false);
-                            setIsComplete(true);
-                        })
-                        .catch((error) => console.error(error))
-
+                    console.log("Added new route");
+                    updateWalk(newRoute);
                 })
                 .catch((error) => console.error(error));
-
-            // console.log(newRoute);
-            // setIsLoading(false);
-            // setIsComplete(true);
         } else {
             Toast.show("Please enter a route name and description!");
         }
+    };
+
+    const updateWalk = (newRoute) => {
+        //Update walk with new route ID
+        let updatedWalk = walk;
+        let currentRoutes = walk.walkRoutes;
+
+        if (currentRoutes === null) {
+            currentRoutes = [newRoute.routeId];
+        } else {
+            currentRoutes.push(newRoute.routeId);
+        }
+
+        updatedWalk = {
+            ...updatedWalk,
+            walkRoutes: currentRoutes
+        };
+
+        fetch('https://dogwalknationapi.azurewebsites.net/Walk/updateWalk', {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                updatedWalk
+            )
+        })
+            .then(() => {
+                console.log("Updated the walk");
+                updateUser(newRoute);
+            })
+            .catch((error) => console.error(error))
+    };
+
+    const updateUser = (newRoute) => {
+
+        retrieveUser().then((user) => {
+            retrieveToken().then((token) => {
+                let updatedUser = user;
+
+                let currentRoutes = user.createdRoutes;
+
+                if (currentRoutes === null) {
+                    currentRoutes = [newRoute.routeId];
+                } else {
+                    currentRoutes.push(newRoute.routeId);
+                }
+
+                updatedUser = {
+                    ...updatedUser,
+                    createdRoutes: currentRoutes
+                };
+
+                console.log(token);
+                fetch('https://dogwalknationapi.azurewebsites.net/User/updateUser', {
+                    method: 'PUT',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                },
+                    body: JSON.stringify(
+                        updatedUser
+                    )
+                })
+                    .then((data) => {
+                        console.log(data);
+                        console.log("Updated the user");
+                        setIsLoading(false);
+                        setIsComplete(true);
+                    })
+                    .catch((error) => console.error(error))
+            })
+        })
     };
 
     function goBackHandler() {
         setModalVisible(false);
         //Go back to walks page without a back button, the random number ensures that a refresh happens on return
         navigation.navigate("Walks", { refresh: Math.random() });
-    }
+    };
 
     const setPolyline = () => {
         // setMarkers([]);
@@ -179,7 +222,7 @@ If you want to reset then press stop to remove current route, then press go to s
             stopLocationUpdates();
             setModalVisible(true);
         }
-    }
+    };
 
     const handlePaused = (bool) => {
         setPaused(bool);
@@ -191,7 +234,7 @@ If you want to reset then press stop to remove current route, then press go to s
             //Pause recording
             stopLocationUpdates();
         }
-    }
+    };
 
     return (
         <View style={styles.container}>
