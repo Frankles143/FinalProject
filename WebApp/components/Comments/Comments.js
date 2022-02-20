@@ -23,13 +23,14 @@ const Comments = ({ navigation, walk }) => {
         // console.log(walk);
         retrieveUser().then((userData) => {
             setCurrentUser(userData);
+
             if (walk.commentIds !== null) {
                 fetchComments(walk, userData);
             } else {
                 setIsLoading(false);
             }
-        })
-        
+        });
+
     }, [walk]);
 
     const fetchComments = (walk, user) => {
@@ -189,19 +190,17 @@ const Comments = ({ navigation, walk }) => {
 
         if (commentBody !== "") {
 
-
             //create comment object
             let date = new Date();
             let dateIso = date.toISOString();
 
             let newComment = {
                 commentId: uuidv4(),
-                //userId and username to change
                 userId: currentUser.id,
                 username: currentUser.username,
                 timestamp: dateIso,
                 commentBody: commentBody
-            }
+            };
 
             //send comment to db
             fetch('https://dogwalknationapi.azurewebsites.net/Comment/newComment', {

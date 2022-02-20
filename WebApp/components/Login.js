@@ -43,12 +43,15 @@ const Login = ({ navigation }) => {
                             Toast.show("Login successful!");
                             try {
                                 const userString = JSON.stringify(json.user);
+                                const tokenString = JSON.stringify(json.token);
                                 AsyncStorage.setItem('User', userString)
                                     .then(() => {
-                                        setIsLoading(false);
-                                        //Clear password everytime the user does anything for security
-                                        setPassword("");
-                                        navigation.navigate("Home");
+                                        AsyncStorage.setItem('Token', tokenString).then(() => {
+                                            setIsLoading(false);
+                                            //Clear password everytime the user does anything for security
+                                            setPassword("");
+                                            navigation.navigate("Home");
+                                        })
                                     })
                             } catch (e) {
                                 // saving error

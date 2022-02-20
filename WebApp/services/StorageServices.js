@@ -15,3 +15,19 @@ export const retrieveUser = async () => {
         return false;
     }
 }
+
+export const retrieveToken = async () => {
+    try {
+        return AsyncStorage.getItem("Token")
+            .then((value) => {
+                if (value !== null) {
+                    var JsonValue = JSON.parse(value);
+                    return JsonValue;
+                }
+            })
+    } catch (e) {
+        // error reading value
+        console.log(e);
+        return false;
+    }
+}

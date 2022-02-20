@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity, Alert, Modal, Pressable, TextInput } from 'react-native';
 import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
-import 'react-native-get-random-values'
+import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Spacing, Typography, Colours } from '../../styles';
@@ -28,7 +28,7 @@ const customMapStyle = [
             }
         ]
     }
-]
+];
 
 const NewRouteMapView = ({ navigation, location, coords, walk, calibrating, newClearMarkers, getLocationUpdates, stopLocationUpdates }) => {
     const [clearMarkers, setClearMarkers] = useState(null);
@@ -69,7 +69,7 @@ const NewRouteMapView = ({ navigation, location, coords, walk, calibrating, newC
 Press pause if you want to take a break, and press continue to keep going. 
 If you want to reset then press stop to remove current route, then press go to start creating a new route.`
         );
-    }
+    };
 
     const handleNewRoute = () => {
         if (routeName !== "" && routeDesc !== "") {
@@ -96,9 +96,9 @@ If you want to reset then press stop to remove current route, then press go to s
             updatedWalk = {
                 ...updatedWalk,
                 walkRoutes: currentRoutes
-            }
+            };
 
-            //also update walk object with new route attached
+            //also update walk object with new route attached, and user with created route
             fetch('https://dogwalknationapi.azurewebsites.net/Route/newRoute', {
                 method: 'POST',
                 headers: {
@@ -133,9 +133,9 @@ If you want to reset then press stop to remove current route, then press go to s
             // setIsLoading(false);
             // setIsComplete(true);
         } else {
-            Toast.show("Please enter a route name and description!")
+            Toast.show("Please enter a route name and description!");
         }
-    }
+    };
 
     function goBackHandler() {
         setModalVisible(false);
@@ -158,7 +158,7 @@ If you want to reset then press stop to remove current route, then press go to s
                 coordinates={latLng}
                 strokeWidth={10}
                 strokeColor="#0000FF"
-            />
+            />;
             //Set the poly and also the coords for the route
             setPolyLatLng(latLng);
             setPoly(newPoly);
