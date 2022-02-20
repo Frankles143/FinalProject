@@ -96,7 +96,6 @@ If you want to reset then press stop to remove current route, then press go to s
                 )
             })
                 .then(() => {
-                    console.log("Added new route");
                     updateWalk(newRoute);
                 })
                 .catch((error) => console.error(error));
@@ -132,7 +131,6 @@ If you want to reset then press stop to remove current route, then press go to s
             )
         })
             .then(() => {
-                console.log("Updated the walk");
                 updateUser(newRoute);
             })
             .catch((error) => console.error(error))
@@ -157,7 +155,6 @@ If you want to reset then press stop to remove current route, then press go to s
                     createdRoutes: currentRoutes
                 };
 
-                console.log(token);
                 fetch('https://dogwalknationapi.azurewebsites.net/User/updateUser', {
                     method: 'PUT',
                     headers: {
@@ -170,8 +167,6 @@ If you want to reset then press stop to remove current route, then press go to s
                     )
                 })
                     .then((data) => {
-                        console.log(data);
-                        console.log("Updated the user");
                         setIsLoading(false);
                         setIsComplete(true);
                     })
