@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity, Alert, Modal, Pressable, TextInput } from 'react-native';
 import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
@@ -9,6 +9,7 @@ import { Spacing, Typography, Colours } from '../../styles';
 import Calibrating from '../misc/Calibrating';
 import Loading from '../misc/Loading';
 import { retrieveToken, retrieveUser } from '../../services/StorageServices';
+import { HeaderBackButton } from '@react-navigation/elements';
 // import WalkCallout from './WalkCallout';
 
 const customMapStyle = [
@@ -62,6 +63,17 @@ const NewRouteMapView = ({ navigation, location, coords, walk, calibrating, newC
         //This appears every render
         // newRouteTutorial();
     }, []);
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (<HeaderBackButton onPress={() => goBackOverride()} />),
+        });
+    }, [navigation]);
+
+    const goBackOverride = () => {
+        stopLocationUpdates();
+        navigation.goBack();
+    };
 
     const newRouteTutorial = () => {
         Alert.alert(

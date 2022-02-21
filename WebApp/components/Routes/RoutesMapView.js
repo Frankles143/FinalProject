@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ToastAndroid, Button } from 'react-native';
 import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
@@ -6,6 +6,7 @@ import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid';
 
 import { Spacing, Typography, Colours } from '../../styles';
+import { HeaderBackButton } from '@react-navigation/elements';
 
 const customMapStyle = [
     {
@@ -27,7 +28,7 @@ const customMapStyle = [
     }
 ]
 
-const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHazard }) => {
+const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMarker, makeHazard, isCalibrating, getLocationUpdates, stopLocationUpdates }) => {
     const [clearMarkers, setClearMarkers] = useState(null);
     const [markers, setMarkers] = useState([]);
     const [poly, setPoly] = useState(null);
@@ -72,6 +73,17 @@ const RoutesMapView = ({ location, currentRoute, coords, newClearMarker, makeHaz
         }
 
     }, [location, coords, newClearMarker, makeHazard, selectedPointStart, selectedPointEnd, tracks]);
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (<HeaderBackButton onPress={() => goBackOverride()} />),
+        });
+    }, [navigation]);
+
+    const goBackOverride = () => {
+        stopLocationUpdates();
+        navigation.goBack();
+    };
 
     const mapMarkers = () => {
         //Check if coords contains anything and if there are more coords than markers

@@ -25,7 +25,6 @@ const Routes = ({ navigation, route }) => {
     const [makeHazard, setMakeHazard] = useState(false);
 
     useEffect(() => {
-
         getLocation().then((location) => {
             setLocation(location);
 
@@ -60,7 +59,7 @@ const Routes = ({ navigation, route }) => {
 
                 //Calibration
                 if (calCount < 5) {
-                    setIsCalibrating("Calibration in progress...");
+                    setIsCalibrating(true);
                     //Get 5 readings, unless the accuracy increases to an acceptable level first
                     if (currentLocation.coords.accuracy < 8 && calCount > 1) {
                         console.log("Accuracy achieved")
@@ -70,14 +69,7 @@ const Routes = ({ navigation, route }) => {
                         setCalCount(calCount + 1);
                     }
                 } else {
-                    setIsCalibrating("");
-                    //Bool flag here for isRecording
-                    // Tweak saving algorithm here, save every other coord, check for accuracy etc.
-
-                    //Extract co-ordinates
-                    let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
-                    setCoords(coords => [...coords, geo]);
-                    // console.log("Saved")
+                    setIsCalibrating(false);
                 }
 
             } catch (error) {
@@ -92,11 +84,6 @@ const Routes = ({ navigation, route }) => {
             return;
         }
 
-        //Initialise empty array
-        if (coords == null) {
-            setCoords([]);
-        }
-
         let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
 
         if (!isRegistered) await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_UPDATES_TASK, {
@@ -105,7 +92,7 @@ const Routes = ({ navigation, route }) => {
             distanceInterval: 0,
             foregroundService: {
                 notificationTitle: 'Getting location updates',
-                notificationBody: 'Location updates are being used to create your new route!'
+                notificationBody: 'Location updates are being used to help you track your walk!'
             },
             pausesUpdatesAutomatically: false,
 
@@ -113,67 +100,16 @@ const Routes = ({ navigation, route }) => {
     }
 
     //Stop the task to get updates
-    const stopLocationUpdates = async (isStop) => {
+    const stopLocationUpdates = async () => {
         let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
-        setIsCalibrating("");
+        setIsCalibrating(false);
 
         if (isRegistered) {
             setCalCount(0);
 
             Location.stopLocationUpdatesAsync(BACKGROUND_LOCATION_UPDATES_TASK);
-
-            //If stop then clean and pass through data else do nothing
-            if (isStop) {
-                if (coords.length > 0) {
-                    //send to API
-                    saveRoute(coords).then(() => {
-                        console.log("Saved and stopped");
-                    })
-                }
-            } else {
-                console.log("Paused");
-            }
-
         }
     }
-
-    const saveRoute = async (coords) => {
-        //This won't work now, needs to send a full Route object
-        fetch('https://dogwalknationapi.azurewebsites.net/route/newroute', {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(
-                coords
-            )
-        })
-            .then(response => { response.json() })
-            .then(json => {
-                console.log(json);
-                handleClearMarkers();
-                setCoords([]);
-            })
-    }
-
-    const handleClearMarkers = async () => {
-        setCoords([]);
-        setClearMarkers(clearMarkers + 1);
-    }
-
-    // const loadRoute = async () => {
-    //     fetch('https://dogwalknationapi.azurewebsites.net/route/95e416c2-a948-448e-9545-67cbfd8e2b7c')
-    //         .then((response) => response.json())
-    //         .then((data) => {
-    //             console.log(data);
-    //             setCoords(data.routeCoords);
-    //             setCurrentRoute(data);
-    //         })
-    //         .catch((error) => {
-    //             console.log(error)
-    //         });
-    // }
 
     return (
         isLoading ?
@@ -184,29 +120,9 @@ const Routes = ({ navigation, route }) => {
                     <ScrollView
                         contentInsetAdjustmentBehavior="automatic"
                         style={styles.container}>
-                        {/* <View style={styles.container}> */}
-                        {/* <View style={styles.buttonGroup} >
-                            <Button style={styles.button} color={Colours.primary.base} title="Start" onPress={getLocationUpdates} />
-                            <Button style={styles.button} color={Colours.primary.base} title="Stop" onPress={() => stopLocationUpdates(true)} />
-                            <Button style={styles.button} color={Colours.primary.base} title="Pause" onPress={() => stopLocationUpdates(false)} />
-                            <ViewLocationResults location={location} />
-                            <Button style={styles.button} color={Colours.primary.base} title="Clear" onPress={handleClearMarkers} />
-                            <Button style={styles.button} color={Colours.primary.base} title="Get" onPress={getLocation} />
-                        </View> */}
-                        {/* <View style={styles.buttonGroup}>
-                            <Button style={styles.button} color={Colours.primary.base} title="Load route" onPress={loadRoute} />
-                            <Button style={styles.button} color={Colours.primary.base} title="Create hazard" onPress={() => setMakeHazard(!makeHazard)} />
-                        </View> */}
                         <View style={styles.mapSection}>
-                            {/* <Text>{text}</Text> */}
-                            {/* <Text styles={styles.cal}>{isCalibrating}</Text> */}
-                            <RoutesMapView currentRoute={currentRoute || null} coords={coords || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} />
-
+                            <RoutesMapView navigation={navigation} currentRoute={currentRoute || null} coords={coords || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} calibrating={isCalibrating} getLocationUpdates={getLocationUpdates} stopLocationUpdates={stopLocationUpdates}/>
                         </View>
-                        {/* <View>
-
-                        </View> */}
-                        {/* </View> */}
                     </ScrollView>
                 </SafeAreaView>
             </>
