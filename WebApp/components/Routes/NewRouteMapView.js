@@ -244,7 +244,7 @@ If you want to reset then press stop to remove current route, then press go to s
                     },
                     heading: 0,
                     pitch: 0,
-                    zoom: 12,
+                    zoom: 19,
                 }}
                 loadingEnabled={false}
                 loadingBackgroundColor="white"
