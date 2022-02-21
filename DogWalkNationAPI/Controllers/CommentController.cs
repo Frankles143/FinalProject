@@ -1,4 +1,5 @@
-﻿using DogWalkNationAPI.Models;
+﻿using DogWalkNationAPI.Helpers;
+using DogWalkNationAPI.Models;
 using DogWalkNationAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -86,7 +87,7 @@ namespace DogWalkNationAPI.Controllers
             }
         }
 
-        //This needs to be secure, needs a JSON token
+        [TokenAuthorize]
         [HttpDelete]
         [Route("/[controller]/deleteComment")]
         public async Task<Responses.Default> DeleteComment(Guid commentId)

@@ -78,6 +78,7 @@ If you want to reset then press stop to remove current route, then press go to s
 
             let newRoute = {
                 routeId: uuidv4(),
+                walkId: walk.id,
                 routeName: routeName,
                 routeDesc: routeDesc,
                 routeCoords: coords,

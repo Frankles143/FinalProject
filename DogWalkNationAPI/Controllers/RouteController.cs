@@ -1,4 +1,5 @@
-﻿using DogWalkNationAPI.Models;
+﻿using DogWalkNationAPI.Helpers;
+using DogWalkNationAPI.Models;
 using DogWalkNationAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -101,6 +102,24 @@ namespace DogWalkNationAPI.Controllers
                 await _routeHelper.Update(route.RouteId.ToString(), route);
 
                 return new Responses.Default() { Success = true, Message = "Route updated!" };
+            }
+            catch (Exception)
+            {
+                return new Responses.Default() { Success = false, Message = "An error has occurred" };
+                throw;
+            }
+        }
+
+        [TokenAuthorize]
+        [HttpDelete]
+        [Route("/[controller]/deleteRoute")]
+        public async Task<Responses.Default> DeleteRoute(Guid routeId)
+        {
+            try
+            {
+                await _routeHelper.Delete(routeId, routeId.ToString());
+
+                return new Responses.Default() { Success = true, Message = "Route deleted!" };
             }
             catch (Exception)
             {

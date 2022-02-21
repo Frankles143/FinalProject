@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, View } from 'react-native';
-import { retrieveUser } from '../services/StorageServices';
+import { Alert, Button, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
+import { refreshUser, retrieveToken, retrieveUser } from '../services/StorageServices';
 import { Colours, Typography } from '../styles';
 import Loading from './misc/Loading';
 
@@ -10,12 +10,13 @@ const Home = ({ navigation }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [userRoutes, setUserRoutes] = useState(null);
     const [routeOutput, setRouteOutput] = useState(null);
+    const [refresh, setRefresh] = useState(0);
 
     useEffect(() => {
         retrieveUser().then((user) => {
             getUserRoutes(user);
-        })
-    }, []);
+        });
+    }, [refresh]);
 
     const getUserRoutes = (user) => {
 
@@ -62,6 +63,7 @@ const Home = ({ navigation }) => {
             var tempRouteOut =
                 <TouchableHighlight key={i} onPress={() => navigation.navigate("Routes", { currentRoute: route })} underlayColor="white">
                     <View>
+                        <TouchableOpacity style={styles.deleteRoute} onPress={() => confirmDeleteRoute(route)}><Text style={styles.deleteRouteText}>X</Text></TouchableOpacity>
                         <Text></Text>
                         <Text style={styles.body}>Route name: {route.routeName}</Text>
                         <Text style={styles.body}>Route Description: {route.routeDesc}</Text>
@@ -74,10 +76,154 @@ const Home = ({ navigation }) => {
             routeOuts.push(tempRouteOut);
         });
 
+        //Newest routes at the top
+        routeOuts.reverse();
+
         setRouteOutput(routeOuts);
         setUserRoutes(routes);
         setCurrentUser(user);
         setIsLoading(false);
+    }
+
+    const confirmDeleteRoute = (route) => {
+        Alert.alert(
+            "Delete your route?",
+            "Are you sure you would you like to delete this route?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                { text: "Confirm", onPress: () => handleDeleteRoute(route) }
+            ],
+            {
+                cancelable: true,
+            }
+        );
+    }
+
+    const handleDeleteRoute = (route) => {
+        setIsLoading(true);
+
+        retrieveToken().then((token) => {
+
+            // After confirmation dialog then delete from db
+            fetch(`https://dogwalknationapi.azurewebsites.net/Route/deleteRoute?routeId=${route.id}`, {
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(response => response.json())
+                .then((data) => {
+
+                    if (data.success === true) {
+                        updateWalkRemoveRoute(route);
+                    } else {
+                        Toast.show("Could not delete route")
+                        setIsLoading(false);
+                    }
+                })
+                .catch((error) => {
+                    console.error(error)
+                    setIsLoading(false);
+                });
+        })
+    }
+
+    const updateWalkRemoveRoute = (route) => {
+        //Update walk with new route IDs
+
+        //Get walk first
+        fetch(`https://dogwalknationapi.azurewebsites.net/Walk/${route.walkId}`, {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+            .then((response) => response.json())
+            .then((walk) => {
+                console.log(walk)
+                let updatedWalk = walk;
+                let currentRoutes = walk.walkRoutes;
+
+                //Filter out all but route we're removing
+                if (currentRoutes.length === 1) {
+                    currentRoutes = null;
+                } else {
+                    currentRoutes = currentRoutes.filter((singleRoute) => { return singleRoute !== route.id })
+                }
+
+                updatedWalk = {
+                    ...updatedWalk,
+                    walkRoutes: currentRoutes
+                }
+                console.log(updatedWalk)
+                fetch('https://dogwalknationapi.azurewebsites.net/Walk/updateWalk', {
+                    method: 'PUT',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(
+                        updatedWalk
+                    )
+                })
+                    .then(() => {
+                        updateUserRemoveRoute(route)
+                    })
+                    .catch((error) => console.error(error))
+
+            })
+            .catch((error) => console.error(error))
+    }
+
+    const updateUserRemoveRoute = (route) => {
+        //Update user to remove route id
+        retrieveUser().then((user) => {
+            retrieveToken().then((token) => {
+                let updatedUser = user;
+                let currentRoutes = user.createdRoutes;
+
+                //If there is only one created route then we are removing it now, so set to null
+                //Else we filter out the route we're removing
+                if (currentRoutes.length === 1) {
+                    currentRoutes = null;
+                } else {
+                    currentRoutes = currentRoutes.filter((singleRoute) => { return singleRoute !== route.id })
+                }
+
+                //Change only the created routes
+                updatedUser = {
+                    ...updatedUser,
+                    createdRoutes: currentRoutes
+                };
+
+                //Pass in the updated user object to replace what is currently in the db
+                fetch('https://dogwalknationapi.azurewebsites.net/User/updateUser', {
+                    method: 'PUT',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(
+                        updatedUser
+                    )
+                })
+                    .then((data) => {
+                        refreshUser().then((user) => {
+                            getUserRoutes(user);
+                            setIsLoading(false);
+                            setRefresh(refresh + 1);
+                        })
+                    })
+                    .catch((error) => console.error(error))
+            })
+        })
     }
 
     return (
@@ -142,6 +288,18 @@ const styles = StyleSheet.create({
     createdRoutes: {
         width: "100%",
         padding: 5
+    },
+    deleteRoute: {
+        zIndex: 999,
+        position: "absolute",
+        right: 15,
+        top: 15,
+        height: 25,
+        width: 25,
+    },
+    deleteRouteText: {
+        textAlign: "center",
+        ...Typography.header.medium,
     },
     header: {
         marginTop: 10,

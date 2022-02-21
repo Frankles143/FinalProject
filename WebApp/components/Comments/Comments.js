@@ -5,7 +5,7 @@ import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid';
 
 import Loading from '../misc/Loading';
-import { retrieveUser } from '../../services/StorageServices';
+import { retrieveToken, retrieveUser } from '../../services/StorageServices';
 import { Colours, Typography } from '../../styles';
 
 const Comments = ({ navigation, walk }) => {
@@ -122,37 +122,40 @@ const Comments = ({ navigation, walk }) => {
     }
 
     const handleDeleteComment = (commentId) => {
-        console.log(commentId);
+
         setIsLoading(true);
 
-        // After confirmation dialog then delete from db
-        fetch(`https://dogwalknationapi.azurewebsites.net/Comment/deleteComment?commentId=${commentId}`, {
-            method: 'DELETE',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
-            .then(response => response.json())
-            .then((data) => {
-                console.log(data);
-                if (data.success === true) {
-                    updateWalkRemoveComment(commentId)
-                } else {
-                    Toast.show("Could not delete comment")
-                    setIsLoading(false);
-                    setIsComplete(true);
+        retrieveToken().then((token) => {
+
+            // After confirmation dialog then delete from db
+            fetch(`https://dogwalknationapi.azurewebsites.net/Comment/deleteComment?commentId=${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 }
             })
-            .catch((error) => {
-                console.error(error)
-                setIsLoading(false);
-            });
-
+                .then(response => response.json())
+                .then((data) => {
+                    console.log(data);
+                    if (data.success === true) {
+                        updateWalkRemoveComment(commentId)
+                    } else {
+                        Toast.show("Could not delete comment")
+                        setIsLoading(false);
+                        setIsComplete(true);
+                    }
+                })
+                .catch((error) => {
+                    console.error(error)
+                    setIsLoading(false);
+                });
+        })
     }
 
     const updateWalkRemoveComment = (commentId) => {
-        //Update walk with new route ID
+        //Update walk with new route IDs
         // console.log(walk);
         let updatedWalk = walk;
         let currentComments = walk.commentIds;
