@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button } from 'react-native';
+import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight } from 'react-native';
 import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import 'react-native-get-random-values'
@@ -37,6 +37,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
     const [selectedPointStart, setSelectedPointStart] = useState(null);
     const [selectedPointEnd, setSelectedPointEnd] = useState(null);
     const [tracks, setTracks] = useState(false);
+    const [isTracking, setIsTracking] = useState(false);
     const [instruction, setInstruction] = useState("");
     const [route, setRoute] = useState(currentRoute);
     const [hazards, setHazards] = useState([]);
@@ -299,6 +300,16 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
             });
     };
 
+    const handlePaused = (bool) => {
+        //Turn tracking on or off - true or false
+        if(bool) {
+            getLocationUpdates();
+            setIsTracking(true);
+        } else {
+            stopLocationUpdates();
+            setIsTracking(false);
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -339,7 +350,6 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                 }}
 
             >
-
                 {markers[0] != null && markers}
                 {poly !== null && poly}
                 {hazardPoly !== null && hazardPoly}
@@ -368,6 +378,22 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                 />
 
             </RNMapView>
+            {
+                !isTracking ?
+                    //Currently paused, show continue button
+                    <View style={styles.fabConRight}>
+                        <TouchableHighlight style={styles.fab} onPress={() => handlePaused(true)} underlayColor={Colours.primary.light} >
+                            <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Track</Text>
+                        </TouchableHighlight>
+                    </View>
+                    :
+                    //Not paused, show pause button
+                    <View style={styles.fabConRight}>
+                        <TouchableHighlight style={styles.fab} onPress={() => handlePaused(false)} underlayColor={Colours.primary.light} >
+                            <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>Stop</Text>
+                        </TouchableHighlight>
+                    </View>
+            }
         </View >
     );
 };
@@ -377,6 +403,24 @@ export default RoutesMapView;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    fabConRight: {
+        flex: 1,
+        position: "absolute",
+        bottom: 15,
+        right: 15,
+    },
+    fab: {
+        backgroundColor: Colours.primary.base,
+        height: 50,
+        width: 100,
+        borderRadius: 20,
+    },
+    fabText: {
+        fontSize: 24,
+        paddingTop: 8,
+        color: "white",
+        textAlign: "center",
     },
     buttonGroup: {
         flex: 1,
