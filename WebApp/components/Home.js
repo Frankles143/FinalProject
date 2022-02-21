@@ -45,6 +45,7 @@ const Home = ({ navigation }) => {
         }
         else {
             setCurrentUser(user);
+            setRouteOutput(null);
             setUserRoutes(null);
             setIsLoading(false);
         }
@@ -146,7 +147,6 @@ const Home = ({ navigation }) => {
         })
             .then((response) => response.json())
             .then((walk) => {
-                console.log(walk)
                 let updatedWalk = walk;
                 let currentRoutes = walk.walkRoutes;
 
@@ -161,7 +161,7 @@ const Home = ({ navigation }) => {
                     ...updatedWalk,
                     walkRoutes: currentRoutes
                 }
-                console.log(updatedWalk)
+
                 fetch('https://dogwalknationapi.azurewebsites.net/Walk/updateWalk', {
                     method: 'PUT',
                     headers: {
