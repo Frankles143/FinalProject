@@ -45,3 +45,11 @@ export const danger = {
     light: "#e11919",
     base: "#cf1717"
 }
+
+export const blue = {
+    base: "#0000FF"
+}
+
+export const red = {
+    base: "#FF0000"
+}

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight } from 'react-native';
+import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, Alert } from 'react-native';
 import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import 'react-native-get-random-values'
@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Spacing, Typography, Colours } from '../../styles';
 import { HeaderBackButton } from '@react-navigation/elements';
+import { retrieveUser } from '../../services/StorageServices';
 
 const customMapStyle = [
     {
@@ -28,7 +29,7 @@ const customMapStyle = [
     }
 ]
 
-const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMarker, makeHazard, isCalibrating, getLocationUpdates, stopLocationUpdates }) => {
+const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMarker, isCalibrating, getLocationUpdates, stopLocationUpdates }) => {
     const [clearMarkers, setClearMarkers] = useState(null);
     const [markers, setMarkers] = useState([]);
     const [poly, setPoly] = useState(null);
@@ -38,7 +39,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
     const [selectedPointEnd, setSelectedPointEnd] = useState(null);
     const [tracks, setTracks] = useState(false);
     const [isTracking, setIsTracking] = useState(false);
-    const [instruction, setInstruction] = useState("");
+    const [makeHazard, setMakeHazard] = useState(false);
     const [route, setRoute] = useState(currentRoute);
     const [hazards, setHazards] = useState([]);
 
@@ -73,18 +74,77 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
             setTracks(false);
         }
 
+        if (makeHazard === false) {
+            retrieveUser().then((user) => {
+                if (user.createdRoutes?.includes(currentRoute.id)) {
+                    navigation.setOptions({
+                        headerRight: () => (
+                            <Button title="Add hazard"
+                                color={Colours.primary.base}
+                                accessibilityLabel="This opens a dialog to confirm addition of new hazard"
+                                onPress={() => confirmCreateHazard()} />
+                        ),
+                    })
+                }
+            })
+        } else {
+            navigation.setOptions({
+                headerRight: () => (
+                    <Button title="Cancel hazard"
+                        color={Colours.primary.base}
+                        accessibilityLabel="This cancels the addition of new hazard"
+                        onPress={() => confirmCancelHazard()} />
+                ),
+            })
+        }
+
     }, [location, coords, newClearMarker, makeHazard, selectedPointStart, selectedPointEnd, tracks]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
             headerLeft: () => (<HeaderBackButton onPress={() => goBackOverride()} />),
         });
+
     }, [navigation]);
 
     const goBackOverride = () => {
         stopLocationUpdates();
         navigation.goBack();
     };
+
+    const confirmCreateHazard = () => {
+        Alert.alert(
+            "Create new hazard?",
+            "Would you like to create a new hazard for this route?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                { text: "Confirm", onPress: () => setMakeHazard(true) }
+            ],
+            {
+                cancelable: true,
+            }
+        );
+    }
+
+    const confirmCancelHazard = () => {
+        Alert.alert(
+            "Cancel new hazard?",
+            "Would you like to cancel the creation a new hazard?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                { text: "Confirm", onPress: () => setMakeHazard(false) }
+            ],
+            {
+                cancelable: true,
+            }
+        );
+    }
 
     const mapMarkers = () => {
         //Check if coords contains anything and if there are more coords than markers
@@ -108,14 +168,14 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
             //Map all the markers now so that the key remains the same so the coords array can be referenced later
             coords.forEach((coord, i) => {
 
-                let markerColour = "#FF0000";
+                let markerColour = Colours.blue.base;
 
                 //if selected points are null then normal, else colour one, else colour all in between 
                 if (selectedPointStart !== null && selectedPointEnd === null && selectedPointStart === i) {
-                    markerColour = "#228B22"
+                    markerColour = Colours.red.base;
 
                 } else if (selectedPointStart !== null && selectedPointEnd !== null && i >= selectedPointStart && i <= selectedPointEnd) {
-                    markerColour = "#228B22"
+                    markerColour = Colours.red.base;
                 }
 
                 let tempMarker = <Marker
@@ -128,7 +188,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                     tracksViewChanges={tracks}
                 >
                     <View style={styles.dotContainer}>
-                        <View style={{ backgroundColor: markerColour, width: 24, height: 24, borderRadius: 12, }} />
+                        <View style={[styles.hazardMarker, {backgroundColor: markerColour}]} />
                     </View>
                 </Marker>
 
@@ -154,21 +214,18 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
         //Get first point, then second
         if (selectedPointStart === null) {
             setSelectedPointStart(markerKey);
-            setInstruction(`Marker number ${markerKey} selected`);
 
         } else if (selectedPointStart !== null && selectedPointEnd === null) {
 
             if (markerKey < selectedPointStart) {
                 Toast.show("Please select two markers in walk order!");
-                setInstruction("");
             } else {
                 setSelectedPointEnd(markerKey);
-                setInstruction(`Marker number ${markerKey} selected`);
             }
         }
 
         if (selectedPointStart !== null && selectedPointEnd !== null) {
-            setInstruction("Both markers set")
+            handleSaveHazard();
             console.log("Both points set!")
         }
 
@@ -302,7 +359,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
 
     const handlePaused = (bool) => {
         //Turn tracking on or off - true or false
-        if(bool) {
+        if (bool) {
             getLocationUpdates();
             setIsTracking(true);
         } else {
@@ -330,12 +387,12 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                 loadingEnabled={false}
                 loadingBackgroundColor="white"
                 style={styles.map}
-                rotateEnabled={false}
+                rotateEnabled={true}
                 showsPointsOfInterest={false}
                 toolbarEnabled={false}
                 customMapStyle={customMapStyle}
                 onMapReady={() => {
-                    //This timeout is dumb but it's the only way to get the library to work with fitToCoordinates
+                    //This timeout is bad but it's the only way to get the library to work with fitToCoordinates
                     setTimeout(() => {
                         mapRef.current.fitToCoordinates(polyLatLng, {
                             animated: true,
@@ -439,6 +496,14 @@ const styles = StyleSheet.create({
     dotContainer: {
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    hazardMarker: { 
+        margin: 5, 
+        borderWidth: 1, 
+        borderRadius: 3, 
+        width: 14, 
+        height: 14, 
+        transform: [{ rotate: "45deg" }] 
     },
     dot: {
         backgroundColor: 'rgb(0, 120, 255)',
