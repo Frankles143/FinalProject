@@ -4,7 +4,7 @@ import { refreshUser, retrieveToken, retrieveUser } from '../services/StorageSer
 import { Colours, Typography } from '../styles';
 import Loading from './misc/Loading';
 
-const Home = ({ navigation }) => {
+const Home = ({ navigation, route }) => {
     // debugger;
     const [isLoading, setIsLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState(null);
@@ -16,7 +16,7 @@ const Home = ({ navigation }) => {
         retrieveUser().then((user) => {
             getUserRoutes(user);
         });
-    }, [refresh]);
+    }, [refresh, route?.params?.refresh]);
 
     const getUserRoutes = (user) => {
 

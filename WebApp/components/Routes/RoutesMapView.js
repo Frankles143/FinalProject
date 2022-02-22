@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, Alert } from 'react-native';
+import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, Alert, Modal, TextInput } from 'react-native';
 import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import 'react-native-get-random-values'
@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Spacing, Typography, Colours } from '../../styles';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { retrieveUser } from '../../services/StorageServices';
+import Loading from '../misc/Loading';
 
 const customMapStyle = [
     {
@@ -41,6 +42,10 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
     const [isTracking, setIsTracking] = useState(false);
     const [makeHazard, setMakeHazard] = useState(false);
     const [route, setRoute] = useState(currentRoute);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [isComplete, setIsComplete] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [desc, setDesc] = useState("");
     const [hazards, setHazards] = useState([]);
 
     const mapRef = useRef(null);
@@ -138,7 +143,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                     text: "Cancel",
                     style: "cancel"
                 },
-                { text: "Confirm", onPress: () => setMakeHazard(false) }
+                { text: "Confirm", onPress: () => { setMakeHazard(false); setModalVisible(false); } }
             ],
             {
                 cancelable: true,
@@ -188,7 +193,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                     tracksViewChanges={tracks}
                 >
                     <View style={styles.dotContainer}>
-                        <View style={[styles.hazardMarker, {backgroundColor: markerColour}]} />
+                        <View style={[styles.hazardMarker, { backgroundColor: markerColour }]} />
                     </View>
                 </Marker>
 
@@ -221,11 +226,11 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                 Toast.show("Please select two markers in walk order!");
             } else {
                 setSelectedPointEnd(markerKey);
+                setModalVisible(true);
             }
         }
 
         if (selectedPointStart !== null && selectedPointEnd !== null) {
-            handleSaveHazard();
             console.log("Both points set!")
         }
 
@@ -318,10 +323,12 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
     };
 
     const saveHazard = async (coords) => {
+        setIsLoading(true);
+
         let newHazard = {
             hazardId: uuidv4(),
-            hazardName: "TestName3",
-            hazardColour: "green",
+            hazardName: desc,
+            hazardColour: "",
             hazardCoords: coords
         };
 
@@ -345,15 +352,17 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
             )
         })
             .then((response) => {
-                console.log(response);
-                response.json()
+                // console.log(response);
+                response.json();
             })
             .then((data) => {
-                console.log(data);
-                setRoute(updatedRoute);
+                // console.log(data);
+                setIsComplete(true);
+                setIsLoading(false);
+                
             })
             .catch((error) => {
-                console.error(error)
+                console.error(error);
             });
     };
 
@@ -366,12 +375,16 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
             stopLocationUpdates();
             setIsTracking(false);
         }
-    }
+    };
+
+    function goBackHandler() {
+        setModalVisible(false);
+        //Go back to walks page without a back button, the random number ensures that a refresh happens on return
+        navigation.navigate("Home", { refresh: Math.random() });
+    };
 
     return (
         <View style={styles.container}>
-            {/* <Text>{instruction}</Text>
-            <Button style={styles.button} color={Colours.primary.base} title="Save hazard" onPress={handleSaveHazard} /> */}
             <RNMapView
                 ref={mapRef}
                 initialCamera={{
@@ -451,6 +464,49 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                         </TouchableHighlight>
                     </View>
             }
+            <Modal animationType="fade" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        {isLoading ?
+                            <Loading />
+                            :
+                            <>
+                                {isComplete ?
+                                    //Show this once finished
+                                    <>
+                                        <Text style={styles.modalHeader}>Successfully Added!</Text>
+                                        <TouchableHighlight style={[styles.button, styles.buttonClose]} onPress={() => goBackHandler()} underlayColor={Colours.danger.light}>
+                                            <Text style={styles.textStyle}>Close and return</Text>
+                                        </TouchableHighlight>
+                                    </>
+                                    :
+                                    <>
+                                        <Text style={styles.modalHeader}>Create new hazard?</Text>
+                                        <Text style={styles.modalText}>Enter a description for this hazard that people will be able to see.</Text>
+                                        <TextInput
+                                            multiline
+                                            style={styles.input}
+                                            onChangeText={(text) => setDesc(text)}
+                                            value={desc}
+                                            placeholder="Description"
+                                        />
+                                        <View style={styles.break}></View>
+                                        <View style={styles.buttonGroup}>
+                                            <TouchableHighlight style={[styles.button, styles.buttonClose]} onPress={() => confirmCancelHazard()} underlayColor={Colours.danger.light}>
+                                                <Text style={styles.textStyle}>Cancel</Text>
+                                            </TouchableHighlight>
+
+                                            <TouchableHighlight style={[styles.button, styles.buttonConfirm]} onPress={() => handleSaveHazard()} underlayColor={Colours.primary.light}>
+                                                <Text style={styles.textStyle}>Create</Text>
+                                            </TouchableHighlight>
+                                        </View>
+                                    </>
+                                }
+                            </>
+                        }
+                    </View>
+                </View>
+            </Modal>
         </View >
     );
 };
@@ -497,13 +553,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    hazardMarker: { 
-        margin: 5, 
-        borderWidth: 1, 
-        borderRadius: 3, 
-        width: 14, 
-        height: 14, 
-        transform: [{ rotate: "45deg" }] 
+    hazardMarker: {
+        margin: 5,
+        borderWidth: 1,
+        borderRadius: 3,
+        width: 14,
+        height: 14,
+        transform: [{ rotate: "45deg" }]
     },
     dot: {
         backgroundColor: 'rgb(0, 120, 255)',
@@ -521,16 +577,66 @@ const styles = StyleSheet.create({
         shadowRadius: 1.5,
         elevation: 4,
     },
-    arrow: {
-        width: 0,
-        height: 0,
-        backgroundColor: 'transparent',
-        borderStyle: 'solid',
-        borderLeftWidth: 6,
-        borderRightWidth: 6,
-        borderBottomWidth: 10,
-        borderLeftColor: 'transparent',
-        borderRightColor: 'transparent',
-        borderBottomColor: 'rgb(0, 120, 255)',
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        marginTop: 22
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    buttonGroup: {
+        width: "100%",
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2
+    },
+    buttonConfirm: {
+        backgroundColor: Colours.primary.base,
+    },
+    buttonClose: {
+        backgroundColor: Colours.danger.base,
+    },
+    textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    modalHeader: {
+        marginBottom: 10,
+        ...Typography.header.largest
+    },
+    modalText: {
+        ...Typography.body.medium,
+        textAlign: "center"
+    },
+    break: {
+        marginTop: 25,
+        marginBottom: 20,
+        width: "100%",
+        borderBottomWidth: 1,
+    },
+    input: {
+        borderWidth: 1,
+        width: "80%",
+        margin: 10,
+        padding: 10,
     },
 });
