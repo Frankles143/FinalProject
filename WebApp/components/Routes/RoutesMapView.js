@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, Alert, Modal, TextInput } from 'react-native';
-import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
+import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid';
@@ -35,6 +35,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
     const [markers, setMarkers] = useState([]);
     const [poly, setPoly] = useState(null);
     const [polyLatLng, setPolyLatLng] = useState(null);
+    const [hazardDescs, setHazardDescs] = useState(null);
     const [hazardPoly, setHazardPoly] = useState(null);
     const [selectedPointStart, setSelectedPointStart] = useState(null);
     const [selectedPointEnd, setSelectedPointEnd] = useState(null);
@@ -271,26 +272,50 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                 tempHazards.push(currentRoute.routeHazards[i])
             }
 
-            let latLng = [], tempPolys = [];
+            let latLng = [], tempPolys = [], tempDescs = [];
 
-            //Create poly for each hazard
+            //Create poly for each hazard and a tappable description marker
             tempHazards.forEach((hazard, i) => {
                 latLng = [];
                 hazard.hazardCoords.forEach(coord => {
                     latLng = [...latLng, { latitude: coord[0], longitude: coord[1] }];
                 });
 
+                // console.log(latLng.length)
+                //At the halfway mark of the polyline, put down a description marker
+                let half = Math.floor(latLng.length / 2);
+                // console.log(latLng[half])
+                let newDesc = <Marker
+                    key={i}
+                    coordinate={latLng[half]}
+                    anchor={{ x: 0.5, y: 0.6 }}
+                >
+                    <View style={styles.dotContainer}>
+                        <View style={styles.hazardDot} />
+
+                        <View style={styles.calloutView}>
+                            <Callout style={styles.hazardCallout}>
+                                <Text style={styles.hazardText}>{hazard.hazardName}</Text>
+                            </Callout>
+                        </View>
+                    </View>
+                </Marker>
+
                 let newPoly = <Polyline
                     coordinates={latLng}
                     strokeWidth={11}
-                    strokeColor="#FF0000"
+                    strokeColor={Colours.red.base}
+                    // tappable
+                    // onPress={(e) => console.log(e.target._internalFiberInstanceHandleDEV.memoizedProps.coordinates)}
                     key={i}
                 />
 
+                tempDescs.push(newDesc);
                 tempPolys.push(newPoly);
             });
             //Set hazards and hazard poly
             setHazards(tempHazards);
+            setHazardDescs(tempDescs)
             setHazardPoly(tempPolys);
         } else {
             setHazardPoly(null);
@@ -298,6 +323,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
     }
 
     const clearPolys = () => {
+        setHazardDescs(null);
         setPoly(null);
         setHazardPoly(null);
     }
@@ -359,7 +385,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                 // console.log(data);
                 setIsComplete(true);
                 setIsLoading(false);
-                
+
             })
             .catch((error) => {
                 console.error(error);
@@ -423,6 +449,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                 {markers[0] != null && markers}
                 {poly !== null && poly}
                 {hazardPoly !== null && hazardPoly}
+                {hazardDescs !== null && hazardDescs}
 
                 <Marker
                     anchor={{ x: 0.5, y: 0.6 }}
@@ -576,6 +603,35 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 1.5,
         elevation: 4,
+    },
+    hazardDot: {
+        backgroundColor: Colours.red.base,
+        width: 24,
+        height: 24,
+        borderWidth: 3,
+        borderColor: 'white',
+        borderRadius: 12,
+        shadowColor: 'black',
+        shadowOffset: {
+            width: 1,
+            height: 1,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 1.5,
+        elevation: 4,
+    },
+    calloutView: {
+        alignSelf: "center",
+        width: 200,
+        
+    },
+    hazardCallout: {
+        padding: 5,
+        // maxWidth: 150,
+    },
+    hazardText: {
+        ...Typography.body.medium,
+        textAlign: "center",
     },
     centeredView: {
         flex: 1,

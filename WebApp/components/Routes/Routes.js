@@ -30,7 +30,6 @@ const Routes = ({ navigation, route }) => {
 
             //If there is a current route, set it and coords
             if (route.params?.currentRoute) {
-                console.log(route.params.currentRoute)
                 setCoords(route.params.currentRoute.routeCoords);
                 setCurrentRoute(route.params.currentRoute);
             }

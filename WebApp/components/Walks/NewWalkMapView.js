@@ -110,7 +110,7 @@ const NewWalkMapView = ({ navigation, location }) => {
                 loadingEnabled={false}
                 loadingBackgroundColor="white"
                 style={styles.map}
-                rotateEnabled={false}
+                rotateEnabled={true}
                 showsPointsOfInterest={false}
                 toolbarEnabled={false}
                 customMapStyle={customMapStyle}
