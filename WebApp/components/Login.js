@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,9 +11,9 @@ import { retrieveUser } from '../services/StorageServices';
 
 const Login = ({ navigation }) => {
     // debugger;
-    const [isLoading, setIsLoading] = React.useState(false);
-    const [email, setEmail] = React.useState("");
-    const [password, setPassword] = React.useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
     useEffect(() => {
         retrieveUser().then((user) => {
@@ -99,47 +99,51 @@ const Login = ({ navigation }) => {
         isLoading ?
             <Loading />
             :
-            <SafeAreaView>
-                <ScrollView keyboardShouldPersistTaps="always" contentInsetAdjustmentBehavior="automatic">
-                    <View style={styles.mainView} >
-                        <View style={styles.logoSection}>
-                            <Image style={styles.logo} source={Logo} />
-                        </View>
-                        <View style={styles.inputSection}>
-                            <Text style={styles.loginText}>Please log in with your email and password to continue</Text>
-                            <TextInput
-                                value={email}
-                                style={styles.input}
-                                onChangeText={setEmail}
-                                returnKeyType="next"
-                                onSubmitEditing={() => refInputPassword.current.focus()}
-                                blurOnSubmit={false}
-                                placeholder="Email Address"
-                            />
-                            <TextInput
-                                style={styles.input}
-                                onChangeText={setPassword}
-                                ref={refInputPassword}
-                                onSubmitEditing={CheckLoginDetails}
-                                placeholder="Password"
-                                secureTextEntry={true}
-                            />
-                            <View styles={styles.submit}>
-                                <Text></Text>
-                                <Button title="Login" onPress={CheckLoginDetails} color={Colours.primary.base} />
+            <>
+                <SafeAreaView>
+                    <ScrollView keyboardShouldPersistTaps="always" contentInsetAdjustmentBehavior="automatic">
+                        <View style={styles.mainView} >
+                            <View style={styles.logoSection}>
+                                <Image style={styles.logo} source={Logo} />
+                            </View>
+                            <View style={styles.inputSection}>
+                                <Text style={styles.loginText}>Please log in with your email and password to continue</Text>
+                                <TextInput
+                                    value={email}
+                                    style={styles.input}
+                                    onChangeText={setEmail}
+                                    returnKeyType="next"
+                                    onSubmitEditing={() => refInputPassword.current.focus()}
+                                    blurOnSubmit={false}
+                                    placeholder="Email Address"
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    onChangeText={setPassword}
+                                    ref={refInputPassword}
+                                    onSubmitEditing={() => CheckLoginDetails()}
+                                    placeholder="Password"
+                                    secureTextEntry={true}
+                                />
+                                <View styles={styles.submit}>
+                                    <Text></Text>
+                                    <Button title="Login" onPress={() => CheckLoginDetails()} color={Colours.primary.base} />
+                                    <Text></Text>
+                                    <Text></Text>
+                                    <Button title="Register" onPress={() => navigation.navigate("Register")} color={Colours.primary.base} />
+                                </View>
                             </View>
                         </View>
-
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
+                    </ScrollView>
+                </SafeAreaView>
+            </>
     );
 };
 
 const styles = StyleSheet.create({
     mainView: {
         flex: 1,
-        height: Spacing.screen.height * 0.9,
+        height: Spacing.screen.height * 0.85,
         justifyContent: 'center',
         alignItems: "center",
         flexDirection: "column",

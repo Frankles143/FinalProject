@@ -71,24 +71,15 @@ namespace DogWalkNationAPI.Controllers
         [Route("/[controller]/register")]
         public async Task<Responses.Default> RegisterUser(UserRegister newUser)
         {
-            //bool valid;
-            //string msg;
-
             //Replace blank space and make email and username lower case
             newUser.Email = Regex.Replace(newUser.Email.ToLower(), @"\s+", "");
             newUser.Username = Regex.Replace(newUser.Username.ToLower(), @"\s+", "");
-
-            // Check for valid password
-            //(valid, msg) = ValidatePassword(newUser.Password);
-            //if (!valid)
-            //    return new Responses.Default() { Success = false, Message = msg, StatusCode = HttpStatusCode.BadRequest };
 
             // Check for existing user
             var query = new QueryDefinition("SELECT * FROM c WHERE c.Email = @email OR c.UserHandle = @userHandle")
                 .WithParameter("@email", newUser.Email)
                 .WithParameter("@userHandle", newUser.Username);
 
-            //This might not like query.tostring()
             var existing = await _userHelper.GetMultiple(query);
 
             if (existing.Count() > 0)
