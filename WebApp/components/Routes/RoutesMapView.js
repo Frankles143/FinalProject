@@ -108,7 +108,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerLeft: () => (<HeaderBackButton onPress={() => goBackOverride()} />),
+            headerLeft: () => (<HeaderBackButton style={{marginLeft: 0}} onPress={() => goBackOverride()} />),
         });
 
     }, [navigation]);

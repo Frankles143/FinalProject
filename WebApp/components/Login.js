@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -6,6 +6,7 @@ import Loading from './misc/Loading';
 import { Colours, Spacing } from '../styles';
 
 import Logo from '../images/DWNLogo.png';
+import { retrieveUser } from '../services/StorageServices';
 
 
 const Login = ({ navigation }) => {
@@ -13,6 +14,15 @@ const Login = ({ navigation }) => {
     const [isLoading, setIsLoading] = React.useState(false);
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
+
+    useEffect(() => {
+        retrieveUser().then((user) => {
+            if (user) {
+                setIsLoading(false);
+                navigation.navigate("Home");
+            }
+        })
+    }, []);
 
     const CheckLoginDetails = () => {
         if (email !== "" && password !== "") {

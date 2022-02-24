@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { HeaderBackButton } from '@react-navigation/elements';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Alert, Button, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
 import { refreshUser, retrieveToken, retrieveUser } from '../services/StorageServices';
 import { Colours, Typography } from '../styles';
@@ -17,6 +19,35 @@ const Home = ({ navigation, route }) => {
             getUserRoutes(user);
         });
     }, [refresh, route?.params?.refresh]);
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (<HeaderBackButton style={{marginLeft: 0}} onPress={() => confirmLogout()} />),
+        });
+
+    }, [navigation]);
+
+    const confirmLogout = () => {
+        Alert.alert(
+            "Logout?",
+            "Are you sure you would like to logout?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                { text: "Confirm", onPress: () => handleLogout() }
+            ],
+            {
+                cancelable: true,
+            }
+        );
+    }
+    
+    const handleLogout = () => {
+        AsyncStorage.clear();
+        navigation.goBack();
+    }
 
     const getUserRoutes = (user) => {
 

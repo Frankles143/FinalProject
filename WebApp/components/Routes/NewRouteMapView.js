@@ -66,7 +66,7 @@ const NewRouteMapView = ({ navigation, location, coords, walk, calibrating, newC
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerLeft: () => (<HeaderBackButton onPress={() => goBackOverride()} />),
+            headerLeft: () => (<HeaderBackButton style={{marginLeft: 0}} onPress={() => goBackOverride()} />),
         });
     }, [navigation]);
 
