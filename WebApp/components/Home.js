@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { HeaderBackButton } from '@react-navigation/elements';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { Alert, Button, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { Alert, BackHandler, Button, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
 import { refreshUser, retrieveToken, retrieveUser } from '../services/StorageServices';
 import { Colours, Typography } from '../styles';
 import Loading from './misc/Loading';
@@ -19,6 +20,21 @@ const Home = ({ navigation, route }) => {
             getUserRoutes(user);
         });
     }, [refresh, route?.params?.refresh]);
+
+    //Returning true here tells react navigation not to pop a screen as well as doing the function
+    useFocusEffect(
+        useCallback(() => {
+            const onBackPress = () => {
+                confirmLogout();
+
+                return true;
+            };
+            BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+            return () =>
+                BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+        }, [])
+    );
 
     useLayoutEffect(() => {
         navigation.setOptions({

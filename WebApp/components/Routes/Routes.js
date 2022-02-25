@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Toast from 'react-native-simple-toast';
 import { Button, SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,7 +7,6 @@ import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
 import RoutesMapView from './RoutesMapView';
-import ViewLocationResults from '../misc/ViewLocationResults';
 
 import { Spacing, Typography, Colours } from '../../styles';
 import Loading from '../misc/Loading';

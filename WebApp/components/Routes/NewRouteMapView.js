@@ -1,5 +1,5 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity, Alert, Modal, Pressable, TextInput } from 'react-native';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity, Alert, Modal, Pressable, TextInput, BackHandler } from 'react-native';
 import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import 'react-native-get-random-values';
@@ -10,6 +10,7 @@ import Calibrating from '../misc/Calibrating';
 import Loading from '../misc/Loading';
 import { retrieveToken, retrieveUser } from '../../services/StorageServices';
 import { HeaderBackButton } from '@react-navigation/elements';
+import { useFocusEffect } from '@react-navigation/native';
 // import WalkCallout from './WalkCallout';
 
 const customMapStyle = [
@@ -63,6 +64,22 @@ const NewRouteMapView = ({ navigation, location, coords, walk, calibrating, newC
         //This appears every render
         // newRouteTutorial();
     }, []);
+
+    //Returning true here tells react navigation not to pop a screen as well as doing the function
+    useFocusEffect(
+        useCallback(() => {
+            const onBackPress = () => {
+                stopLocationUpdates();
+                navigation.goBack();
+
+                return true;
+            };
+            BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+            return () =>
+                BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+        }, [])
+    );
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -191,7 +208,7 @@ If you want to reset then press stop to remove current route, then press go to s
     function goBackHandler() {
         setModalVisible(false);
         //Go back to walks page without a back button, the random number ensures that a refresh happens on return
-        navigation.navigate("Walks", { refresh: Math.random() });
+        navigation.navigate("Home", { refresh: Math.random() });
     };
 
     const setPolyline = () => {

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, Alert, Modal, TextInput } from 'react-native';
+import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, Alert, Modal, TextInput, BackHandler } from 'react-native';
 import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import 'react-native-get-random-values'
@@ -9,6 +9,7 @@ import { Spacing, Typography, Colours } from '../../styles';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { retrieveUser } from '../../services/StorageServices';
 import Loading from '../misc/Loading';
+import { useFocusEffect } from '@react-navigation/native';
 
 const customMapStyle = [
     {
@@ -106,9 +107,25 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
 
     }, [location, coords, newClearMarker, makeHazard, selectedPointStart, selectedPointEnd, tracks]);
 
+    //Returning true here tells react navigation not to pop a screen as well as doing the function
+    useFocusEffect(
+        useCallback(() => {
+            const onBackPress = () => {
+                stopLocationUpdates();
+                navigation.goBack();
+
+                return true;
+            };
+            BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+            return () =>
+                BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+        }, [])
+    );
+
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerLeft: () => (<HeaderBackButton style={{marginLeft: 0}} onPress={() => goBackOverride()} />),
+            headerLeft: () => (<HeaderBackButton style={{ marginLeft: 0 }} onPress={() => goBackOverride()} />),
         });
 
     }, [navigation]);
@@ -623,7 +640,7 @@ const styles = StyleSheet.create({
     calloutView: {
         alignSelf: "center",
         width: 200,
-        
+
     },
     hazardCallout: {
         padding: 5,
