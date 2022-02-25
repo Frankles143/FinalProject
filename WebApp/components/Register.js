@@ -20,81 +20,59 @@ const Register = ({ navigation }) => {
     const [passwordConfirm, setPasswordConfirm] = useState("");
 
     useEffect(() => {
-        
+
     }, []);
 
-    const CheckLoginDetails = () => {
-        if (email !== "" && password !== "") {
+    const registerUser = () => {
+        if (username !== "" && email !== "" && firstName !== "" && lastName !== "" && password !== "" && passwordConfirm !== "") {
+            if (password === passwordConfirm) {
+                setIsLoading(true);
 
-            setIsLoading(true);
+                //Create newUser object
+                let newUser = {
+                    username: username,
+                    email: email,
+                    firstName: firstName,
+                    lastName: lastName,
+                    password: password
+                }
 
-            var loginUser = {
-                email: email,
-                password: password
-            }
-
-            fetch('https://dogwalknationapi.azurewebsites.net/user/login', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(
-                    loginUser
-                )
-            })
-                .then((response) => response.json())
-                .then((json) => {
-                    console.log(json)
-                    if (json.status !== 400) {
-
-                        if (json.success === true) {
-                            Toast.show("Login successful!");
-                            try {
-                                const userString = JSON.stringify(json.user);
-                                const tokenString = JSON.stringify(json.token);
-
-                                //Store user and token items for use later on
-                                AsyncStorage.setItem('User', userString)
-                                    .then(() => {
-                                        AsyncStorage.setItem('Token', tokenString).then(() => {
-                                            setIsLoading(false);
-                                            //Clear password everytime the user does anything for security
-                                            setPassword("");
-                                            navigation.navigate("Home");
-                                        })
-                                    })
-                            } catch (e) {
-                                // saving error
-                                console.log(e)
+                //Send to API
+                fetch('https://dogwalknationapi.azurewebsites.net/user/register', {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(
+                        newUser
+                    )
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if(data.status !== 400) {
+                            if(data.success == true) {
+                                Toast.show("Register successful!");
                                 setIsLoading(false);
-                                setPassword("");
+                                navigation.goBack();
                             }
                         } else {
                             //Response from API
-                            Toast.show(json.message);
+                            Toast.show(data.message);
                             setIsLoading(false);
-                            setPassword("");
                         }
-                    } else {
-                        Toast.show("Please enter a valid email address")
-                        setIsLoading(false);
-                        setPassword("");
-                    }
-                })
-                .catch((error) => {
-                    console.error(error);
-                    setIsLoading(false);
-                    setPassword("");
-                })
-        } else {
-            Toast.show("Please enter a username and password!")
-        }
-    }
+                    })
+                    .catch((error) => {
+                        console.error(error)
+                    })
 
-    const registerUser = () => {
-        Toast.show("yahaahaaaaaaa")
-    }
+            } else {
+                Toast.show("Passwords don't match!");
+            }
+        } else {
+            Toast.show("Please fill in all fields!");
+        }
+    };
 
     const refInputEmail = useRef();
     const refInputFirstName = useRef();
@@ -169,7 +147,7 @@ const Register = ({ navigation }) => {
                             <Text style={styles.inputText}>Confirm Password:</Text>
                             <TextInput
                                 style={styles.input}
-                                onChangeText={setPassword}
+                                onChangeText={setPasswordConfirm}
                                 ref={refInputConfirmPassword}
                                 onSubmitEditing={() => registerUser()}
                                 placeholder="Confirm Password"

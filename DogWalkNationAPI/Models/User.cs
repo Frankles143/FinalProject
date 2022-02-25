@@ -65,6 +65,7 @@ namespace DogWalkNationAPI.Models
         [JsonProperty(PropertyName = "username")]
         public string Username { get; set; }
         [JsonProperty(PropertyName = "email")]
+        [EmailAddress]
         public string Email { get; set; }
         [JsonProperty(PropertyName = "firstName")]
         public string FirstName { get; set; }
