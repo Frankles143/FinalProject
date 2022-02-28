@@ -2,7 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Alert, BackHandler, Button, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
+import { Alert, AppState, BackHandler, Button, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
+import { checkPermissions, getPermissions } from '../services/LocationServices';
 import { refreshUser, retrieveToken, retrieveUser } from '../services/StorageServices';
 import { Colours, Typography } from '../styles';
 import Loading from './misc/Loading';
@@ -16,6 +17,12 @@ const Home = ({ navigation, route }) => {
     const [refresh, setRefresh] = useState(0);
 
     useEffect(() => {
+        checkPermissions().then((permission) => {
+            if (!permission) {
+                permissionsTutorial();
+            }
+        });
+
         retrieveUser().then((user) => {
             getUserRoutes(user);
         });
@@ -38,7 +45,7 @@ const Home = ({ navigation, route }) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerLeft: () => (<HeaderBackButton style={{marginLeft: 0}} onPress={() => confirmLogout()} />),
+            headerLeft: () => (<HeaderBackButton style={{ marginLeft: 0 }} onPress={() => confirmLogout()} />),
         });
 
     }, [navigation]);
@@ -59,10 +66,21 @@ const Home = ({ navigation, route }) => {
             }
         );
     }
-    
+
     const handleLogout = () => {
         AsyncStorage.clear();
         navigation.goBack();
+    }
+
+    const permissionsTutorial = async () => {
+        Alert.alert(
+            "Location permissions required",
+            `Dog Walk Nation requires access to your location to get the most out of the application!
+To be able to create Routes effectively please check "Allow all the time", and turn OFF battery optimisation.
+This allows you to be able to lock your phone and not have it out the whole time you are creating your route.`,
+            [{ text: "Confirm", onPress: () => getPermissions() }]
+        );
+
     }
 
     const getUserRoutes = (user) => {

@@ -1,8 +1,25 @@
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
+import Toast from 'react-native-simple-toast';
 
-//Function to quickly check permissions for foreground and background tasks
+//Function to quickly check permissions for foreground and background
 export const checkPermissions = async () => {
+    let foreStatus = await Location.getForegroundPermissionsAsync();
+    let backStatus = await Location.getBackgroundPermissionsAsync();
+
+    if (foreStatus.status != "granted") {
+        return false;
+    }
+
+    if (backStatus.status != "granted") {
+        return false;
+    }
+
+    return true;
+}
+
+//Function to get permissions for foreground and background
+export const getPermissions = async () => {
     let foreStatus = await Location.requestForegroundPermissionsAsync();
     let backStatus = await Location.requestBackgroundPermissionsAsync();
 
@@ -23,6 +40,7 @@ export const checkPermissions = async () => {
 export const getLocation = async () => {
 
     if (!checkPermissions) {
+        getPermissions();
         return;
     }
 
@@ -80,6 +98,7 @@ export async function handleLocationUpdate({ data, error }) {
 //Start getting location updates
 export const getLocationUpdates = async () => {
     if (!checkPermissions) {
+        getPermissions();
         return;
     }
 
