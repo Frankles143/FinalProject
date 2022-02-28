@@ -13,7 +13,7 @@ const WalkCallout = ({ walk }) => {
     }, [walk]);
 
     return (
-        <View style={styles.callout}>
+        <View>
             <Text style={styles.text}>
                 <Text style={styles.walkName}>{walk.walkName}{"\n"}</Text>
                 {`Number of routes available: ${routeNo} 
@@ -24,9 +24,6 @@ Tap here to go to walk page!`}
 };
 
 const styles = StyleSheet.create({
-    callout: {
-        // textAlign: "center",
-    },
     text: {
         textAlign: "center",
     },

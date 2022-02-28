@@ -1,20 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, View} from 'react-native';
 import Toast from 'react-native-simple-toast';
-import { Button, SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getLocation, checkPermissions } from '../../services/LocationServices';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
+import { getLocation, checkPermissions } from '../../services/LocationServices';
+import { Spacing, Typography } from '../../styles';
 import RoutesMapView from './RoutesMapView';
-
-import { Spacing, Typography, Colours } from '../../styles';
 import Loading from '../misc/Loading';
 
 const Routes = ({ navigation, route }) => {
-    // debugger;
     const [isLoading, setIsLoading] = useState(true);
-    const [user, setUser] = useState();
     const [location, setLocation] = useState(null);
     const [currentRoute, setCurrentRoute] = useState(null);
     const [coords, setCoords] = useState(null);
@@ -60,10 +56,9 @@ const Routes = ({ navigation, route }) => {
                     setIsCalibrating(true);
                     //Get 5 readings, unless the accuracy increases to an acceptable level first
                     if (currentLocation.coords.accuracy < 8 && calCount > 1) {
-                        console.log("Accuracy achieved")
+                        Toast.show("Accuracy achieved")
                         setCalCount(5);
                     } else {
-                        console.log("Calibrating...")
                         setCalCount(calCount + 1);
                     }
                 } else {
@@ -71,7 +66,7 @@ const Routes = ({ navigation, route }) => {
                 }
 
             } catch (error) {
-                console.log('the error', error)
+                console.error(error);
             }
         }
     }
@@ -116,8 +111,7 @@ const Routes = ({ navigation, route }) => {
             <>
                 <SafeAreaView>
                     <ScrollView
-                        contentInsetAdjustmentBehavior="automatic"
-                        style={styles.container}>
+                        contentInsetAdjustmentBehavior="automatic">
                         <View style={styles.mapSection}>
                             <RoutesMapView navigation={navigation} currentRoute={currentRoute || null} coords={coords || null} location={location.coords} newClearMarker={clearMarkers} makeHazard={makeHazard} calibrating={isCalibrating} getLocationUpdates={getLocationUpdates} stopLocationUpdates={stopLocationUpdates}/>
                         </View>
@@ -128,25 +122,9 @@ const Routes = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-    },
-    buttonGroup: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        marginTop: 15,
-    },
-    button: {
-        width: '40%',
-        // height: 40
-    },
     mapSection: {
-        // flex: 9,
         height: Spacing.screen.height * 0.9,
     },
-    cal: {
-        ...Typography.body.medium,
-    }
 });
 
 export default Routes;

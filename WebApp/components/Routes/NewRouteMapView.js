@@ -41,7 +41,6 @@ const NewRouteMapView = ({ navigation, location, coords, walk, calibrating, newC
     const [isComplete, setIsComplete] = useState(false);
     const [poly, setPoly] = useState(null);
     const [polyLatLng, setPolyLatLng] = useState(null);
-    const [newRouteCoords, setNewRouteCoords] = useState(null);
     const [routeName, setRouteName] = useState("");
     const [routeDesc, setRouteDesc] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
@@ -49,8 +48,6 @@ const NewRouteMapView = ({ navigation, location, coords, walk, calibrating, newC
 
     useEffect(() => {
         setModalVisible(false);
-        // console.log(coords);
-        // console.log(walk);
         setPolyline();
 
         if (newClearMarkers > clearMarkers) {
@@ -61,9 +58,9 @@ const NewRouteMapView = ({ navigation, location, coords, walk, calibrating, newC
     }, [location, calibrating]);
 
     useEffect(() => {
-        //This appears every render
-        // newRouteTutorial();
-    }, []);
+        //This only appears once
+        newRouteTutorial();
+    }, [navigation]);
 
     //Returning true here tells react navigation not to pop a screen as well as doing the function
     useFocusEffect(
@@ -167,7 +164,7 @@ If you want to reset then press stop to remove current route, then press go to s
     };
 
     const updateUser = (newRoute) => {
-
+        //Update user with new route id
         retrieveUser().then((user) => {
             retrieveToken().then((token) => {
                 let updatedUser = user;
@@ -212,8 +209,6 @@ If you want to reset then press stop to remove current route, then press go to s
     };
 
     const setPolyline = () => {
-        // setMarkers([]);
-
         //Check if there are coordinates
         if (coords?.length > 0) {
             //Create LatLng array first

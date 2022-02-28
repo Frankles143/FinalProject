@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, Alert, Modal, TextInput, BackHandler } from 'react-native';
 import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
+import { HeaderBackButton } from '@react-navigation/elements';
+import { useFocusEffect } from '@react-navigation/native';
 import Toast from 'react-native-simple-toast';
 import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid';
 
-import { Spacing, Typography, Colours } from '../../styles';
-import { HeaderBackButton } from '@react-navigation/elements';
+import { Typography, Colours } from '../../styles';
 import { retrieveUser } from '../../services/StorageServices';
 import Loading from '../misc/Loading';
-import { useFocusEffect } from '@react-navigation/native';
 
 const customMapStyle = [
     {
@@ -81,6 +81,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
             setTracks(false);
         }
 
+        //Change button depending on what is currently happening
         if (makeHazard === false) {
             retrieveUser().then((user) => {
                 if (user.createdRoutes?.includes(currentRoute.id)) {
@@ -249,7 +250,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
         }
 
         if (selectedPointStart !== null && selectedPointEnd !== null) {
-            console.log("Both points set!")
+
         }
 
     };
@@ -298,10 +299,8 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                     latLng = [...latLng, { latitude: coord[0], longitude: coord[1] }];
                 });
 
-                // console.log(latLng.length)
                 //At the halfway mark of the polyline, put down a description marker
                 let half = Math.floor(latLng.length / 2);
-                // console.log(latLng[half])
                 let newDesc = <Marker
                     key={i}
                     coordinate={latLng[half]}
@@ -323,6 +322,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
                     strokeWidth={11}
                     strokeColor={Colours.red.base}
                     // tappable
+                    // This would be the way to make a custom callout for polylines
                     // onPress={(e) => console.log(e.target._internalFiberInstanceHandleDEV.memoizedProps.coordinates)}
                     key={i}
                 />
@@ -395,11 +395,9 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
             )
         })
             .then((response) => {
-                // console.log(response);
                 response.json();
             })
             .then((data) => {
-                // console.log(data);
                 setIsComplete(true);
                 setIsLoading(false);
 
@@ -587,11 +585,9 @@ const styles = StyleSheet.create({
     },
     button: {
         width: '40%',
-        // height: 40
     },
     map: {
         flex: 1,
-        //   ...StyleSheet.absoluteFillObject,
     },
     dotContainer: {
         justifyContent: 'center',
@@ -644,7 +640,6 @@ const styles = StyleSheet.create({
     },
     hazardCallout: {
         padding: 5,
-        // maxWidth: 150,
     },
     hazardText: {
         ...Typography.body.medium,

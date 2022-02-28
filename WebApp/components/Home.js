@@ -1,15 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { Alert, BackHandler, Button, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Alert, AppState, BackHandler, Button, SafeAreaView, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { checkPermissions, getPermissions } from '../services/LocationServices';
 import { refreshUser, retrieveToken, retrieveUser } from '../services/StorageServices';
 import { Colours, Typography } from '../styles';
 import Loading from './misc/Loading';
 
 const Home = ({ navigation, route }) => {
-    // debugger;
     const [isLoading, setIsLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState(null);
     const [userRoutes, setUserRoutes] = useState(null);

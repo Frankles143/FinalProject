@@ -11,7 +11,7 @@ export const retrieveUser = async () => {
             })
     } catch (e) {
         // error reading value
-        console.log(e);
+        console.error(e);
         return false;
     }
 }
@@ -27,7 +27,7 @@ export const retrieveToken = async () => {
             })
     } catch (e) {
         // error reading value
-        console.log(e);
+        console.error(e);
         return false;
     }
 }
@@ -52,7 +52,7 @@ export const refreshUser = async () => {
                     })
                 })
                 .catch((error) => {
-                    console.log(error)
+                    console.error(error)
                     return;
                 });
         })

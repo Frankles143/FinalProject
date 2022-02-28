@@ -12,7 +12,6 @@ const Comments = ({ navigation, walk }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isComplete, setIsComplete] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
-    const [isUser, setIsUser] = useState(true);
     const [commentsFormatted, setCommentsFormatted] = useState(null);
     const [commentBody, setCommentBody] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
@@ -20,7 +19,6 @@ const Comments = ({ navigation, walk }) => {
 
     useEffect(() => {
         //get comments first
-        // console.log(walk);
         retrieveUser().then((userData) => {
             setCurrentUser(userData);
 
@@ -64,10 +62,10 @@ const Comments = ({ navigation, walk }) => {
 
     const handleComments = (comments, user) => {
         let tempComments = [];
-        // console.log(comments)
+
+        //Format date and time for each comment
         comments.forEach((comment, i) => {
             let date = new Date(Date.parse(comment.timestamp));
-            // console.log(date);
             let timestamp = `${date.getUTCHours()}:${date.getUTCMinutes()}  ${date.getUTCDate()}/${date.getUTCMonth() + 1}/${date.getUTCFullYear()}`
             let temp;
 
@@ -138,7 +136,6 @@ const Comments = ({ navigation, walk }) => {
             })
                 .then(response => response.json())
                 .then((data) => {
-                    console.log(data);
                     if (data.success === true) {
                         updateWalkRemoveComment(commentId)
                     } else {
@@ -155,8 +152,7 @@ const Comments = ({ navigation, walk }) => {
     }
 
     const updateWalkRemoveComment = (commentId) => {
-        //Update walk with new route IDs
-        // console.log(walk);
+        //Update walk with new comment IDs
         let updatedWalk = walk;
         let currentComments = walk.commentIds;
 
@@ -222,16 +218,13 @@ const Comments = ({ navigation, walk }) => {
                     updateWalkNewComment(newComment);
                 })
                 .catch((error) => console.error(error));
-
-            //Update comments somehow? - currently just goes back home
         } else {
             Toast.show("Please enter a comment!")
         }
     }
 
     const updateWalkNewComment = (newComment) => {
-        //Update walk with new route ID
-        // console.log(walk);
+        //Update walk with new comment ID
         let updatedWalk = walk;
         let currentComments = walk.commentIds;
 

@@ -1,13 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity, Alert, Modal, Pressable, TextInput } from 'react-native';
-import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
+import { View, StyleSheet, Text, TouchableHighlight, Alert, Modal, TextInput } from 'react-native';
+import RNMapView, { Circle, Marker } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
-import 'react-native-get-random-values'
-import { v4 as uuidv4 } from 'uuid';
 
-import { Spacing, Typography, Colours } from '../../styles';
+import { Typography, Colours } from '../../styles';
 import Loading from '../misc/Loading';
-import WalkCallout from './WalkCallout';
 
 const customMapStyle = [
     {
@@ -75,13 +72,9 @@ const NewWalkMapView = ({ navigation, location }) => {
                 .then((data) => {
                     setIsLoading(false);
                     setIsComplete(true);
-                    // setTimeout(() => { goBackHandler(); }, 3000);
                 })
                 .catch((error) => console.error(error));
 
-            // setIsLoading(false);
-            // setIsComplete(true);
-            // setTimeout(() => { goBackHandler(); }, 3000);
         } else {
             Toast.show("Please enter a walk name and description!")
         }

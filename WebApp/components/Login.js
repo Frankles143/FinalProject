@@ -2,15 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Loading from './misc/Loading';
-import { Colours, Spacing } from '../styles';
 
-import Logo from '../images/DWNLogo.png';
+import Loading from './misc/Loading';
 import { retrieveUser } from '../services/StorageServices';
+import { Colours, Spacing } from '../styles';
+import Logo from '../images/DWNLogo.png';
 
 
 const Login = ({ navigation }) => {
-    // debugger;
     const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -46,7 +45,6 @@ const Login = ({ navigation }) => {
             })
                 .then((response) => response.json())
                 .then((json) => {
-                    console.log(json)
                     if (json.status !== 400) {
 
                         if (json.success === true) {
@@ -67,7 +65,7 @@ const Login = ({ navigation }) => {
                                     })
                             } catch (e) {
                                 // saving error
-                                console.log(e)
+                                console.error(e)
                                 setIsLoading(false);
                                 setPassword("");
                             }
@@ -147,7 +145,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: "center",
         flexDirection: "column",
-        // backgroundColor: Colours.primary.base,
     },
     logoSection: {
         flex: 0.4,
@@ -170,16 +167,13 @@ const styles = StyleSheet.create({
     loginText: {
         marginTop: 15,
         fontSize: 15,
-        // color: Colours.neutral.grey1,
     },
     input: {
         width: '60%',
         marginTop: 20,
         borderStyle: "solid",
         borderColor: "black",
-        // borderColor: Colours.neutral.grey3,
         borderWidth: 1.5,
-        // color: Colours.neutral.grey1,
     },
     submit: {
         width: "100%",

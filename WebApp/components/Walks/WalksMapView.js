@@ -1,11 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity, Alert } from 'react-native';
-import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
-import Toast from 'react-native-simple-toast';
-import 'react-native-get-random-values'
-import { v4 as uuidv4 } from 'uuid';
+import { View, StyleSheet, Button, Alert } from 'react-native';
+import RNMapView, { Callout, Circle, Marker} from 'react-native-maps';
 
-import { Spacing, Typography, Colours } from '../../styles';
+import { Colours } from '../../styles';
 import WalkCallout from './WalkCallout';
 
 const customMapStyle = [
@@ -34,8 +31,6 @@ const WalksMapView = ({ navigation, location, walks }) => {
 
     useEffect(() => {
         //Create markers for the walks and put them on map
-        // console.log(location)
-        // console.log(walks);
         createWalkMarkers();
 
     }, [location, walks]);
@@ -64,7 +59,6 @@ const WalksMapView = ({ navigation, location, walks }) => {
                         latitude: walk.walkCoords[0],
                         longitude: walk.walkCoords[1]
                     }}
-                // onPress={(e) => handleMarkerSelect(e)}
                 >
                     <Callout onPress={() => navigation.navigate('Walk Details', { name: walk.walkName, walk: walk })}>
                         <WalkCallout walk={walk} />
@@ -142,14 +136,7 @@ const WalksMapView = ({ navigation, location, walks }) => {
                     strokeColor="rgba(0, 150, 255, 0.25)"
                     fillColor="rgba(0, 150, 255, 0.25)"
                 />
-
-
             </RNMapView>
-            {/* <View style={styles.fabCon}>
-                <TouchableHighlight style={styles.fab} onPress={() => confirmCreateWalk() } underlayColor={Colours.primary.light} >
-                    <Text adjustsFontSizeToFit={true} numberOfLines={1} style={styles.fabText}>+</Text>
-                </TouchableHighlight>
-            </View> */}
         </View>
     );
 
@@ -158,23 +145,6 @@ const WalksMapView = ({ navigation, location, walks }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    fabCon: {
-        flex: 1,
-        position: "absolute",
-        bottom: 15,
-        right: 15,
-    },
-    fab: {
-        backgroundColor: Colours.primary.base,
-        height: 50,
-        width: 50,
-        borderRadius: 100,
-    },
-    fabText: {
-        fontSize: 50,
-        color: "white",
-        textAlign: 'center',
     },
     map: {
         flex: 1,
@@ -198,18 +168,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 1.5,
         elevation: 4,
-    },
-    arrow: {
-        width: 0,
-        height: 0,
-        backgroundColor: 'transparent',
-        borderStyle: 'solid',
-        borderLeftWidth: 6,
-        borderRightWidth: 6,
-        borderBottomWidth: 10,
-        borderLeftColor: 'transparent',
-        borderRightColor: 'transparent',
-        borderBottomColor: 'rgb(0, 120, 255)',
     },
 });
 

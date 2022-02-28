@@ -13,11 +13,10 @@ import NewRoute from './components/Routes/NewRoute';
 const Stack = createNativeStackNavigator();
 
 const App = () => {
-    // debugger;
 
     return (
         <NavigationContainer>
-            <Stack.Navigator> 
+            <Stack.Navigator initialRouteName="Login"> 
                 <Stack.Screen name="Login" component={Login} options={{headerShown: false}} />
                 <Stack.Screen name="Register" component={Register} />
                 <Stack.Screen name="Home" component={Home} options={{title: "Home"}} />
@@ -32,5 +31,3 @@ const App = () => {
 };
 
 export default App;
-
-{/* initialRouteName="Login" */}

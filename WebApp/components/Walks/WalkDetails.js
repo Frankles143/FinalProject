@@ -15,7 +15,6 @@ const WalkDetails = ({ navigation, route }) => {
     useEffect(() => {
         if (route.params?.walk) {
             setWalk(route.params?.walk)
-            // console.log(route.params?.walk);
             getRoutes(route.params?.walk);
         }
     }, [route.params?.walk]);

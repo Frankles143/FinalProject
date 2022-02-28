@@ -3,8 +3,8 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Typography } from '../../styles';
 
 const ViewLocationResults = ({ location }) => {
-
-
+    
+    //This was used for debugging early on, not included in user facing code
     return (
         !location ? <View></View> :
             <View style={styles.result}>

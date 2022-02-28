@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Loading from './misc/Loading';
-import { Colours, Spacing, Typography } from '../styles';
 
-import Logo from '../images/DWNLogo.png';
-import { retrieveUser } from '../services/StorageServices';
+import Loading from './misc/Loading';
+import { Colours, Typography } from '../styles';
+
 
 
 const Register = ({ navigation }) => {
@@ -180,7 +178,6 @@ const styles = StyleSheet.create({
     loginText: {
         marginTop: 15,
         fontSize: 15,
-        // color: Colours.neutral.grey1,
     },
     inputText: {
         marginLeft: "20%",
@@ -190,12 +187,9 @@ const styles = StyleSheet.create({
     },
     input: {
         width: '60%',
-        // marginTop: 20,
         borderStyle: "solid",
         borderColor: "black",
-        // borderColor: Colours.neutral.grey3,
         borderWidth: 1.5,
-        // color: Colours.neutral.grey1,
     },
     submit: {
         width: "100%",

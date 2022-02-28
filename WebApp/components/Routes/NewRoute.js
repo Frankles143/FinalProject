@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getLocation, checkPermissions } from '../../services/LocationServices';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
+import { getLocation, checkPermissions } from '../../services/LocationServices';
+import { Spacing } from '../../styles';
 import NewRouteMapView from './NewRouteMapView';
-
-import { Spacing, Typography, Colours } from '../../styles';
 import Loading from '../misc/Loading';
 
 const NewRoute = ({ navigation, route }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [user, setUser] = useState();
     const [walk, setWalk] = useState();
     const [location, setLocation] = useState(null);
     const [coords, setCoords] = useState(null);
@@ -25,7 +22,6 @@ const NewRoute = ({ navigation, route }) => {
         getLocation().then((location) => {
             setLocation(location);
             setWalk(route.params?.walk);
-            // console.log(route.params?.walk);
             setIsLoading(false);
         })
     }, []);
@@ -54,25 +50,21 @@ const NewRoute = ({ navigation, route }) => {
                     setIsCalibrating(true);
                     //Get 5 readings, unless the accuracy increases to an acceptable level first
                     if (currentLocation.coords.accuracy < 8 && calCount > 1) {
-                        console.log("Accuracy achieved")
+                        Toast.show("Accuracy achieved")
                         setCalCount(5);
                     } else {
-                        console.log("Calibrating...")
                         setCalCount(calCount + 1);
                     }
                 } else {
                     setIsCalibrating(false);
-                    //Bool flag here for isRecording
-                    // Tweak saving algorithm here, save every other coord, check for accuracy etc.
-
                     //Extract co-ordinates
                     let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
                     setCoords(coords => [...coords, geo]);
-                    // console.log("Saved")
+                    
                 }
 
             } catch (error) {
-                console.log('the error', error)
+                console.error(error)
             }
         }
     }
@@ -103,7 +95,6 @@ const NewRoute = ({ navigation, route }) => {
         })
     }
 
-    //TODO: Add this as a return function in useEffect to make sure it stops getting updates if app crashes mid way etc. 
     //Stop the task to get updates
     const stopLocationUpdates = async () => {
         let isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_LOCATION_UPDATES_TASK)
@@ -143,7 +134,6 @@ export default NewRoute;
 
 const styles = StyleSheet.create({
     mapSection: {
-        // flex: 9,
         height: Spacing.screen.height * 0.9,
     },
 });

@@ -72,25 +72,21 @@ export async function handleLocationUpdate({ data, error }) {
                 setIsCalibrating("Calibration in progress...");
                 //Get 5 readings, unless the accuracy increases to an acceptable level first
                 if (currentLocation.coords.accuracy < 8 && calCount > 1) {
-                    console.log("Accuracy achieved")
+                    Toast.show("Accuracy achieved");
                     setCalCount(5);
                 } else {
-                    console.log("Calibrating...")
                     setCalCount(calCount + 1);
                 }
             } else {
                 setIsCalibrating("");
-                //Bool flag here for isRecording
-                // Tweak saving algorithm here, save every other coord, check for accuracy etc.
 
                 //Extract co-ordinates
                 let geo = [currentLocation.coords.latitude, currentLocation.coords.longitude];
                 setCoords(coords => [...coords, geo]);
-                // console.log("Saved")
             }
 
         } catch (error) {
-            console.log('the error', error)
+            console.error(error)
         }
     }
 }
@@ -137,12 +133,8 @@ export const stopLocationUpdates = async (isStop) => {
             if (coords.length > 0) {
                 //send to API
                 saveRoute(coords).then(() => {
-                    console.log("Saved and stopped");
                 })
             }
-        } else {
-            console.log("Paused");
         }
-
     }
 }
