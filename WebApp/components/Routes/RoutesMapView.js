@@ -353,7 +353,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
         }
 
         let hazardCoords = [];
-
+        
         coords.forEach((coord, i) => {
             if (i >= selectedPointStart && i <= selectedPointEnd) {
                 hazardCoords.push(coord);
@@ -367,7 +367,7 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
 
     const saveHazard = async (coords) => {
         setIsLoading(true);
-
+        
         let newHazard = {
             hazardId: uuidv4(),
             hazardName: desc,
@@ -376,12 +376,17 @@ const RoutesMapView = ({ navigation, location, currentRoute, coords, newClearMar
         };
 
         let updatedRoute = route;
-        let hazards = [...updatedRoute.routeHazards];
-        hazards.push(newHazard);
+        let routeHazards = updatedRoute.routeHazards;
+
+        if (routeHazards === null) {
+            routeHazards = [newHazard];
+        } else {
+            routeHazards.push(newHazard);
+        }
 
         updatedRoute = {
             ...updatedRoute,
-            routeHazards: hazards
+            routeHazards: routeHazards
         }
 
         fetch('https://dogwalknationapi.azurewebsites.net/Route/updateRoute', {
