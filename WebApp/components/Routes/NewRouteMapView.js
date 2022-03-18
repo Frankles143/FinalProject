@@ -250,7 +250,7 @@ If you want to reset then press stop to remove current route, then press go to s
         if (bool === false) {
             //Unpause
             getLocationUpdates();
-        } else if (bool === false) {
+        } else if (bool === true) {
             //Pause recording
             stopLocationUpdates();
         }
