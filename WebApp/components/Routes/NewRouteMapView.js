@@ -273,7 +273,7 @@ If you want to reset then press stop to remove current route, then press go to s
                 loadingEnabled={false}
                 loadingBackgroundColor="white"
                 style={styles.map}
-                rotateEnabled={false}
+                rotateEnabled={true}
                 showsPointsOfInterest={false}
                 toolbarEnabled={false}
                 customMapStyle={customMapStyle}

@@ -23,7 +23,7 @@ const Home = ({ navigation, route }) => {
             }
         });
 
-        retrieveUser().then((user) => {
+        refreshUser().then((user) => {
             getUserRoutes(user);
         });
     }, [refresh, route?.params?.refresh]);
