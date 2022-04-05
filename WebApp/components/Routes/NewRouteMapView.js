@@ -1,17 +1,16 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, ToastAndroid, Button, TouchableHighlight, TouchableOpacity, Alert, Modal, Pressable, TextInput, BackHandler } from 'react-native';
-import RNMapView, { Callout, Circle, Marker, Polyline } from 'react-native-maps';
+import { View, StyleSheet, Text, TouchableHighlight, Alert, Modal, TextInput, BackHandler } from 'react-native';
+import RNMapView, { Circle, Marker, Polyline } from 'react-native-maps';
 import Toast from 'react-native-simple-toast';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Spacing, Typography, Colours } from '../../styles';
+import { Typography, Colours } from '../../styles';
 import Calibrating from '../misc/Calibrating';
 import Loading from '../misc/Loading';
 import { retrieveToken, retrieveUser } from '../../services/StorageServices';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { useFocusEffect } from '@react-navigation/native';
-// import WalkCallout from './WalkCallout';
 
 const customMapStyle = [
     {
