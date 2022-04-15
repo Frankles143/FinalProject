@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import jwt_decode from 'jwt-decode';
 
 import Loading from './misc/Loading';
-import { retrieveUser } from '../services/StorageServices';
+import { retrieveToken, retrieveUser } from '../services/StorageServices';
 import { Colours, Spacing } from '../styles';
 import Logo from '../images/DWNLogo.png';
 
@@ -15,10 +16,24 @@ const Login = ({ navigation }) => {
     const [password, setPassword] = useState("");
 
     useEffect(() => {
-        retrieveUser().then((user) => {
-            if (user) {
-                setIsLoading(false);
-                navigation.navigate("Home");
+        //Get the token when app is opened
+        retrieveToken().then((token) => {
+            //If there is a token, decode and check when it expires
+            if (token) {
+                let decoded = jwt_decode(token);
+                
+                //If the token has more than an hour remaining then check for user
+                if (decoded.exp > (Date.now() / 1000) - 3600000) {
+                    retrieveUser().then((user) => {
+                        if (user) {
+                            setIsLoading(false);
+                            navigation.navigate("Home");
+                        }
+                    })
+                } else {
+                    //Clear expired token and user object
+                    AsyncStorage.clear();
+                }
             }
         })
     }, []);

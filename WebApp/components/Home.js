@@ -68,6 +68,7 @@ const Home = ({ navigation, route }) => {
     }
 
     const handleLogout = () => {
+        //Clear user and token objects from storage and go to login screen
         AsyncStorage.clear();
         navigation.goBack();
     }
