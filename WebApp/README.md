@@ -1,10 +1,7 @@
-# FinalYearProject
-A place to store everything for my final year project, which is a dog walks app written in React Native. 
+# Dog Walk Nation
+This folder is the storage for the application code, written in React Native.
 
-This folder is the storage for the application code.
-
-Due to the fact that this project is written in React Native and is a mobile application there are certain emulators that can be used, like Android Studio.
-However, most emulators don't work with live maps or geolocation libraries, which is rather large chunk of this application.
+Due to the fact that this is a mobile application there are certain emulators that can be used, like Android Studio. However, most emulators don't work with live maps or geolocation libraries, which is rather large chunk of this application.
 
 ---
 
