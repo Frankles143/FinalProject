@@ -3,6 +3,16 @@ This folder is the storage for the application code, written in React Native.
 
 Due to the fact that this is a mobile application there are certain emulators that can be used, like Android Studio. However, most emulators don't work with live maps or geolocation libraries, which is rather large chunk of this application.
 
+--- 
+
+If you would like to build your own .apk file then you can clone the repository, open a command window or terminal and navigate to the folder:
+
+`..\FinalProject\WebApp\android`
+
+From here, if you are using a Windows Command Prompt you can run `gradlew assembleRelease`, or if you are on a Windows powershell terminal, Linux or Mac run `./gradlew assembleRelease`
+
+Once that executes successfully (this can take a few minutes), you should find the .apk file called "app-release.apk" in `WebApp\android\app\build\outputs\apk\release`
+
 ---
 
 If you'd like to download the android installation file (dogwalknation.apk), you can follow this link: [Google drive .apk download.](https://drive.google.com/file/d/1_7RQD57YDIgTfcys1f0lZFpkUGD1JTjU/view?usp=sharing)
